@@ -9,3 +9,6 @@ The fan pin should be run through a relay or transistor and not directly connect
 - Open-meteo API lookup for local area weather conditions
 - BME280 local environment sensing (temperature, humidity, pressure)
 - GPIO on/off control based on comparisons of local area vs environment conditions
+- Debug logging capability
+- Configurable network retries
+- Basic network status feedback via onboard LED

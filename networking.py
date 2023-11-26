@@ -116,3 +116,6 @@ class Wireless_Network:
         self.assess_connection_time(elapsed_ms)
 
         flash_led(1, 2)
+
+    def get_status(self) -> int:
+        return self.wlan.status()

@@ -3,8 +3,9 @@ wifi_password = ""
 wifi_country = "GB"
 
 wifi_status_led = True
-# -1 = retry forever
-wifi_auto_reconnect_tries = -1
+wifi_connect_timeout_seconds = 10
+wifi_connect_retries = 1
+wifi_retry_backoff_seconds = 5
 
 # lat and long in decimal format array with Lattitude in 0
 # postion and Longitude in 1

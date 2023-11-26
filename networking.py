@@ -52,8 +52,8 @@ class Wireless_Network:
         self.logger.info(f"active: {1 if self.wlan.active() else 0}, status: {status} ({self.status_names[status]})")
         return status
     
-    def wait_status(self, expected_status, *, timeout=10, tick_sleep=0.5) -> bool:
-        for i in range(ceil(timeout / tick_sleep)):
+    def wait_status(self, expected_status, *, timeout=config.wifi_connect_timeout_seconds, tick_sleep=0.5) -> bool:
+        for unused in range(ceil(timeout / tick_sleep)):
             sleep(tick_sleep)
             status = self.dump_status()
             if status == expected_status:
@@ -73,46 +73,42 @@ class Wireless_Network:
                 raise Exception(f"Failed to disconnect: {x}")
         self.logger.info("Ready for connection!")
     
-    def assess_connection_time(self, elapsed_ms) -> None:
+    def generate_connection_info(self, elapsed_ms) -> None:
+        ip, subnet, gateway, dns = self.wlan.ifconfig()
+        self.logger.info(f"IP: {ip}, Subnet: {subnet}, Gateway: {gateway}, DNS: {dns}")
+        
+        self.logger.info(f"Elapsed: {elapsed_ms}ms")
         if elapsed_ms > 5000:
             self.logger.warn(f"took {elapsed_ms} milliseconds to connect to wifi")
 
-    def connect_wifi(self, retry_count) -> None:
-        self.logger.info(f"Connecting to wifi network '{self.wifi_ssid}'")
+    def led_connection_error(self) -> None:
+        flash_led(2, 2)
 
-        retries = 0
-        try:
-            self.connect_to_ap()
-        except Exception:
-            if retries <= retry_count or retry_count < 0:
-                flash_led(2, 2)
-                retries += 1
-                self.logger.warn(f"Retrying wifi connection, retry count: {retries} of {retry_count}")
-                self.connect_to_ap()
-            else:
-                raise Exception(f"Failed to connect to wifi after retry count of {retry_count} exceeded")
-        
-        self.logger.info(f"Connected to wifi with {retries} retries")
+    def led_connection_success(self) -> None:
+        flash_led(1, 2)
 
-    def connect_to_ap(self) -> None:
-
-        start_ms = ticks_ms()
-
-        self.disconnect_wifi_if_necessary()
-        
+    def attempt_ap_connect(self) -> None:
         self.logger.info(f"Connecting to SSID {self.wifi_ssid} (password: {self.wifi_password})...")
+        self.disconnect_wifi_if_necessary()
         self.wlan.connect(self.wifi_ssid, self.wifi_password)
         try:
             self.wait_status(self.CYW43_LINK_UP)
         except Exception as x:
+            self.led_connection_error()
             raise Exception(f"Failed to connect to SSID {self.wifi_ssid} (password: {self.wifi_password}): {x}")
+        self.led_connection_success()
         self.logger.info("Connected successfully!")
+    
+    def connect_wifi(self) -> None:
+        self.logger.info("Connecting to wifi")
+        start_ms = ticks_ms()
+        try:
+            self.attempt_ap_connect()
+        except Exception:
+            raise Exception(f"Failed to connect to network")
 
-        ip, subnet, gateway, dns = self.wlan.ifconfig()
-        self.logger.info(f"IP: {ip}, Subnet: {subnet}, Gateway: {gateway}, DNS: {dns}")
-        
         elapsed_ms = ticks_ms() - start_ms
-        self.logger.info(f"Elapsed: {elapsed_ms}ms")
-        self.assess_connection_time(elapsed_ms)
+        self.generate_connection_info(elapsed_ms)
 
-        flash_led(1, 2)
+    def get_status(self) -> int:
+        return self.wlan.status()

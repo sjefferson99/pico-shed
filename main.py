@@ -4,11 +4,18 @@ from bme_280 import BME_280
 from machine import Pin
 from time import sleep
 import config
+from helpers import flash_led
 
 fan_pin = Pin(config.fan_gpio_pin, Pin.OUT)
 
 wlan = Wireless_Network()
-wlan.connect_wifi()
+
+while wlan.wlan.status() != 3:
+    try:
+        wlan.connect_wifi(config.wifi_auto_reconnect_tries)
+    except:
+        print("Error connecting to wifi after configured retries")
+        flash_led(20, 4)
 
 weather = weather_api()
 sensor = BME_280()
@@ -30,4 +37,4 @@ while True:
         print("Turning off fan")
         fan_pin.off()
 
-    sleep(300)
+    sleep(config.weather_poll_frequency_in_seconds)

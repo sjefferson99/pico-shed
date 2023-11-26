@@ -5,20 +5,21 @@ from machine import Pin
 from time import sleep
 import config
 from helpers import flash_led
+from fan import Fan
 
-fan_pin = Pin(config.fan_gpio_pin, Pin.OUT)
+fan = Fan()
 
 wlan = Wireless_Network()
+weather = weather_api()
+sensor = BME_280()
 
 while wlan.wlan.status() != 3:
     try:
         wlan.connect_wifi(config.wifi_auto_reconnect_tries)
     except:
         print("Error connecting to wifi after configured retries")
+        fan.switch_on()
         flash_led(20, 4)
-
-weather = weather_api()
-sensor = BME_280()
 
 while True:
     weather_data = weather.get_weather()
@@ -32,9 +33,9 @@ while True:
 
     if inside_humidity > outside_humidity:
         print("Turning on fan")
-        fan_pin.on()
+        fan.switch_on()
     else:
         print("Turning off fan")
-        fan_pin.off()
+        fan.switch_off()
 
     sleep(config.weather_poll_frequency_in_seconds)

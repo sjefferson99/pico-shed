@@ -7,8 +7,9 @@ from json import loads
 from time import localtime
 import urequests
 import config
+from ulogging import uLogger
 
-class weather_api:
+class Weather_API:
     """
     Class for interacting with the Open_Meteo API
     """
@@ -17,7 +18,7 @@ class weather_api:
         self.baseurl = "https://api.open-meteo.com/v1/forecast?latitude={}&longitude={}".format(self.latlong[0], self.latlong[1])
         self.parameters = "&hourly=temperature_2m,dewpoint_2m,relative_humidity_2m,weathercode,pressure_msl,windspeed_10m,winddirection_10m,windgusts_10m&current_weather=true&past_days=1&forecast_days=1&windspeed_unit=kn&timezone=GB&timeformat=unixtime"
         self.url = self.baseurl + self.parameters
-        self.debugging = False
+        self.logger = uLogger("Open-Meteo", 0)
         
         #Weather codes from: https://www.meteomatics.com/en/api/available-parameters/derived-weather-and-convenience-parameters/general-weather-state/#weather_symb
         self.weather_code_map = {
@@ -29,28 +30,21 @@ class weather_api:
             "wind": []
         }
 
-    def log(self, message) -> None:
-        print(f"[Weather] {message}")
-
-    def debug(self, message) -> None:
-        if self.debugging == True:
-            print(f"[Weather] {message}")
-    
     def get_weather(self, offset_hours: int = 0) -> dict:
         """
         Get weather information for a configured location as of now and offset_hours in the past to a maximum of 24
         Returns a dictionary of weather information with human readable key names - Nautical metric units.
         """
         weather = {}
-        self.debug(self.url)
+        self.logger.info(self.url)
         response = urequests.get(self.url)
-        self.debug(f"response data: {response.text}")
-        self.debug(f"response code: {response.status_code}")
+        self.logger.info(f"response data: {response.text}")
+        self.logger.info(f"response code: {response.status_code}")
 
         if response.status_code == 200:
             weather = self.process_weather(loads(response.text), offset_hours)
         else:
-            self.log("Failure to get weather data.\nStatus code: {}\nResponse text: {}".format(response.status_code, response.text))
+            self.logger.error("Failure to get weather data.\nStatus code: {}\nResponse text: {}".format(response.status_code, response.text))
 
         return weather
 
@@ -63,7 +57,7 @@ class weather_api:
     def process_weather(self, response_text_json: dict, offset_hours: int) -> dict:
         weather = {}
         data = response_text_json["hourly"]
-        self.debug(f"JSON data: {data}\n")
+        self.logger.info(f"JSON data: {data}\n")
         hour = localtime()[3]
         current_hour = hour + 24
         offset_hour = current_hour - offset_hours
@@ -89,8 +83,11 @@ class weather_api:
             weather["offset_wind_gusts"] = data["windgusts_10m"][offset_hour]
             weather["offset_weather_description"] = self.lookup_weather_code(weather["offset_weather_code"])
 
-        if self.debugging:
-            for parameter in weather:
-                print(parameter, ":", weather[parameter])
+        
+        self.logger.info(weather)
+        
+        # if self.debugging:
+        #     for parameter in weather:
+        #         print(parameter, ":", weather[parameter])
         
         return weather

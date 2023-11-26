@@ -14,6 +14,7 @@ class Fan:
         self.weather = Weather_API()
         self.sensor = BME_280()
         self.logger = uLogger("Fan", 0)
+        self.led_retry_backoff_frequency = 4
 
     def switch_on(self) -> None:
         self.fan_pin.on()
@@ -33,19 +34,32 @@ class Fan:
 
     def assess_fan_state(self) -> None:
         self.logger.info("Assessing fan state")
-        self.check_network_access()
-        
-        weather_data = self.weather.get_weather()
-        readings = self.sensor.get_readings()
+        network_access = self.check_network_access()
+        if network_access == True:
+            weather_data = self.weather.get_weather()
+            readings = self.sensor.get_readings()
+            self.set_fan_from_humidity(readings["humidity"], weather_data["humidity"])
 
-        self.set_fan_from_humidity(readings["humidity"], weather_data["humidity"])
+    def network_retry_backoff(self) -> None:
+        self.logger.info(f"Backing off retry for {config.wifi_retry_backoff_seconds} seconds")
+        flash_led((config.wifi_retry_backoff_seconds * self.led_retry_backoff_frequency), self.led_retry_backoff_frequency)
 
-    def check_network_access (self) -> None:
+    def check_network_access (self) -> bool:
         self.logger.info("Checking for network access")
-        while self.wlan.get_status() != 3:
+        retries = 0
+        while self.wlan.get_status() != 3 and retries <= config.wifi_connect_retries:
             try:
-                self.wlan.connect_wifi(config.wifi_auto_reconnect_tries)
-            except:
-                self.logger.error(f"Error connecting to wifi after {config.wifi_auto_reconnect_tries} retries")
-                self.switch_on()
-                flash_led(20, 4)
+                self.wlan.connect_wifi()
+                return True
+            except Exception:
+                self.logger.warn(f"Error connecting to wifi on attempt {retries + 1} of {config.wifi_connect_retries + 1}")
+                retries += 1
+                self.network_retry_backoff()
+
+        if self.wlan.get_status == 3:
+            self.logger.info("Connected to wireless network")
+            return True
+        else:
+            self.logger.warn("Unable to connect to wireless network")
+            self.switch_on()
+            return False

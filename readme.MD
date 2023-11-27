@@ -12,3 +12,4 @@ The fan pin should be run through a relay or transistor and not directly connect
 - Debug logging capability
 - Configurable network retries
 - Basic network status feedback via onboard LED
+- Hysteresis on fan state change

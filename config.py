@@ -16,3 +16,6 @@ weather_poll_frequency_in_seconds = 300
 i2c_pins = {"sda": 0, "scl": 1}
 
 fan_gpio_pin = 2
+
+#How much dryer outside before the fan turns on
+humidity_hysteresis_pc = 1

@@ -25,10 +25,10 @@ class Fan:
         self.logger.info("Fan switched off")
     
     def set_fan_from_humidity(self, inside_humidity: float, outside_humidity: float) -> None:
-        if inside_humidity > outside_humidity:
+        if inside_humidity >= outside_humidity + config.humidity_hysteresis_pc:
             self.logger.info("Turning on fan")
             self.switch_on()
-        else:
+        if inside_humidity <= outside_humidity:
             self.logger.info("Turning off fan")
             self.switch_off()
 

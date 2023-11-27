@@ -12,3 +12,5 @@ The fan pin should be run through a relay or transistor and not directly connect
 - Debug logging capability
 - Configurable network retries
 - Basic network status feedback via onboard LED
+- Fan fails to on state if no network
+- Ensures network for API calls with configurable retries 

@@ -2,7 +2,7 @@ from time import sleep
 import config
 from fan import Fan
 
-fan = Fan()
+fan = Fan(log_level=0)
 
 while True:
 

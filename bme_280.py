@@ -8,10 +8,10 @@ from ulogging import uLogger
 
 class BME_280:
     
-    def __init__(self) -> None:
+    def __init__(self, log_level: int) -> None:
         self.i2c = PimoroniI2C(**config.i2c_pins)
         self.bme = BreakoutBME280(self.i2c)
-        self.logger = uLogger("BME280", 0)
+        self.logger = uLogger("BME280", log_level)
 
     def get_readings(self) -> dict:
         temperature, pressure, humidity = self.bme.read()

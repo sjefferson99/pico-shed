@@ -10,14 +10,14 @@ from helpers import flash_led
 
 class Wireless_Network:
 
-    def __init__(self) -> None:
+    def __init__(self, log_level: int) -> None:
+        self.logger = uLogger("WIFI", log_level)
         self.wifi_ssid = config.wifi_ssid
         self.wifi_password = config.wifi_password
         self.wifi_country = config.wifi_country
         rp2.country(self.wifi_country)
         self.disable_power_management = 0xa11140
         self.status_led_enable = config.wifi_status_led
-        self.logger = uLogger("WIFI", 0)
         
         # Reference: https://datasheets.raspberrypi.com/picow/connecting-to-the-internet-with-pico-w.pdf
         self.CYW43_LINK_DOWN = 0

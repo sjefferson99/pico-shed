@@ -7,15 +7,15 @@ from bme_280 import BME_280
 from ulogging import uLogger
 
 class Fan:
-    def __init__(self) -> None:
+    def __init__(self, log_level: int) -> None:
+        self.logger = uLogger("Fan", log_level)
         self.max_pwm_duty = 65535
-        self.logger = uLogger("Fan", 0)
         self.fan_pwm_pin = PWM(Pin(config.fan_gpio_pin, Pin.OUT))
         self.fan_pwm_pin.freq(1000)
         self.switch_off()
-        self.wlan = Wireless_Network()
-        self.weather = Weather_API()
-        self.sensor = BME_280()
+        self.wlan = Wireless_Network(log_level)
+        self.weather = Weather_API(log_level)
+        self.sensor = BME_280(log_level)
         self.led_retry_backoff_frequency = 4
         self.humidity_hysteresis_pc = config.humidity_hysteresis_pc
 

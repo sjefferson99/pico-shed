@@ -45,7 +45,6 @@ class Wireless_Network:
         self.wlan.config(pm=self.disable_power_management)
         mac = hexlify(self.wlan.config('mac'),':').decode()
         self.logger.info("MAC: " + mac)
-        flash_led(1, 1)
     
     def dump_status(self):
         status = self.wlan.status()

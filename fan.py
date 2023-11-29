@@ -17,6 +17,7 @@ class Fan:
         self.weather = Weather_API()
         self.sensor = BME_280()
         self.led_retry_backoff_frequency = 4
+        self.humidity_hysteresis_pc = config.humidity_hysteresis_pc
 
     def switch_on(self) -> None:
         self.set_speed(1)
@@ -32,12 +33,20 @@ class Fan:
         """
         duty = int(self.max_pwm_duty * speed)
         self.fan_pwm_pin.duty_u16(duty)
-        self.logger.info(f"Fan speed set to speed {speed} which is duty {duty}")
+        self.logger.info(f"Fan speed set to speed {speed}, which is duty {duty}")
+    
+    def calculate_required_fan_speed(self, inside_humidity, outside_humidity) -> float:
+        speed = 0
+        humidity_difference = inside_humidity - (outside_humidity + self.humidity_hysteresis_pc)
+        if humidity_difference > 0:
+            speed = min(1, (humidity_difference / 10))
+        self.logger.info(f"calculated fan speed is {speed}")
+        return speed
     
     def set_fan_from_humidity(self, inside_humidity: float, outside_humidity: float) -> None:
-        if inside_humidity >= outside_humidity + config.humidity_hysteresis_pc:
+        if inside_humidity >= outside_humidity + self.humidity_hysteresis_pc:
             self.logger.info("Turning on fan")
-            self.switch_on()
+            self.set_speed(self.calculate_required_fan_speed(inside_humidity, outside_humidity))
         if inside_humidity <= outside_humidity:
             self.logger.info("Turning off fan")
             self.switch_off()

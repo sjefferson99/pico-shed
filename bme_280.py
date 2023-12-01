@@ -1,4 +1,4 @@
-# Requires the pico to be running a Pimoroni specific micropytho build:
+# Requires the pico to be running a Pimoroni specific micropython build:
 # https://github.com/pimoroni/pimoroni-pico/releases
 
 from breakout_bme280 import BreakoutBME280

@@ -15,8 +15,11 @@ class Display:
         self.line_spacing = 2
         self.WIDTH, self.HEIGHT = self.display.get_bounds()
         self.top_margin = 10
-        self.left_margin = 10
         self.bottom_margin = 0
+        self.left_margin = 10
+        self.right_margin = 0
+        self.useable_width = self.WIDTH - self.left_margin - self.right_margin
+        self.logger.info(f"useable width: {self.useable_width}")
         self.current_y = 0
         self.header_font_scale = 3
         self.normal_font_scale = 2
@@ -28,23 +31,43 @@ class Display:
         self.display.set_backlight(1.0)
         self.print_startup_text()
 
-    def print_startup_text(self) -> None:
+    def clear_screen(self) -> None:
         self.display.set_pen(self.BACKGROUND)
         self.display.clear()
-        self.display.set_pen(self.WHITE)
         self.current_y = self.top_margin
-        self.display.text("Starting up...", self.left_margin, self.top_margin, self.WIDTH - self.left_margin, self.header_font_scale)
-        self.display.update()
-        self.current_y = self.current_y + (self.header_font_scale * self.font_height)
-    
-    def add_startup_text_line(self, text: str) -> None:
+
+    def print_startup_text(self) -> None:
+        self.clear_screen()
         self.display.set_pen(self.WHITE)
-        next_y_start = self.current_y + self.line_spacing
-        next_y_end = next_y_start + (self.font_height * self.normal_font_scale)
-        if next_y_end > (self.HEIGHT - self.bottom_margin):
-            self.print_startup_text()
-            next_y_start = self.current_y + self.line_spacing
-            next_y_end = next_y_start + (self.font_height * self.normal_font_scale)
-        self.display.text(text, self.left_margin, next_y_start, self.WIDTH - self.left_margin, self.normal_font_scale)
+        self.display.text("Starting up...", self.left_margin, self.top_margin, self.useable_width, self.header_font_scale)
         self.display.update()
-        self.current_y = next_y_end # Doesn't take account of any wrapping
+        self.current_y = self.current_y + (self.header_font_scale * self.font_height) + self.line_spacing
+    
+    def get_text_line_count(self, text: str, scale: float) -> int:
+        line_count = 1
+        text_width = self.display.measure_text(text, scale)
+        self.logger.info(f"Text width: {text_width}")
+        
+        while text_width > self.useable_width:
+            text_width -= self.useable_width
+            line_count += 1
+            self.logger.info(f"Adding line_count, new text width is {text_width}")
+            
+        return line_count
+    
+    def add_text_line(self, text: str) -> None:
+        next_y_start = self.current_y
+        next_y_end = next_y_start + (((self.font_height * self.normal_font_scale) + self.line_spacing) * self.get_text_line_count(text, self.normal_font_scale))
+        self.logger.info(f"Calculated next_y_end: {next_y_end}")
+        
+        if next_y_end > (self.HEIGHT - self.bottom_margin):
+            self.clear_screen()
+            next_y_start = self.current_y
+            next_y_end = next_y_start + (((self.font_height * self.normal_font_scale) + self.line_spacing) * self.get_text_line_count(text, self.normal_font_scale))
+            self.logger.info(f"Reset to top of page and calculated next_y_end: {next_y_end}")
+        
+        self.display.set_pen(self.WHITE)
+        self.display.text(text, self.left_margin, next_y_start, self.useable_width, self.normal_font_scale)
+        self.display.update()
+        self.current_y = next_y_end
+        self.logger.info(f"Current_y now set to : {self.current_y}")

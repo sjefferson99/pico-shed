@@ -19,3 +19,6 @@ fan_gpio_pin = 2
 
 #How much dryer outside before the fan turns on
 humidity_hysteresis_pc = 1
+
+# Seconds to pause each auto scrolling information page for troubleshooting (usually startup)
+auto_page_scroll_pause = 2

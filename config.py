@@ -17,8 +17,10 @@ i2c_pins = {"sda": 0, "scl": 1}
 
 fan_gpio_pin = 2
 
-#How much dryer outside before the fan turns on
+# How much dryer outside before the fan turns on
 humidity_hysteresis_pc = 1
 
+## Display options
+display_enabled = True
 # Seconds to pause each auto scrolling information page for troubleshooting (usually startup)
 auto_page_scroll_pause = 2

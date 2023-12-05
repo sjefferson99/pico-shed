@@ -12,7 +12,3 @@ def flash_led(count: int, hz: float) -> None:
         status_led.on()
         sleep(sleep_duration)
         status_led.off()
-
-def print_to_startup_display(text: str, display: Display|None) -> None:
-        if display != None:
-            display.add_text_line(text)

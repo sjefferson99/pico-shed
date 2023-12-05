@@ -1,14 +1,14 @@
 from machine import Pin, PWM
 import config
 from networking import Wireless_Network
-from helpers import flash_led, print_to_startup_display
+from helpers import flash_led
 from open_meteo import Weather_API
 from bme_280 import BME_280
 from ulogging import uLogger
 from display import Display
 
 class Fan:
-    def __init__(self, log_level: int, display: Display|None = None) -> None:
+    def __init__(self, log_level: int, display: Display) -> None:
         self.logger = uLogger("Fan", log_level)
         self.display = display
         self.max_pwm_duty = 65535
@@ -24,15 +24,15 @@ class Fan:
     
     def fan_test(self) -> None:
         self.logger.info("Testing fan")
-        print_to_startup_display("Testing fan", self.display)
+        self.display.add_text_line("Testing fan")
         self.set_speed(0.1)
-        print_to_startup_display("Testing fan - 1/10 speed", self.display)
+        self.display.add_text_line("Testing fan - 1/10 speed")
         flash_led(4, 2)
         self.set_speed(0.5)
-        print_to_startup_display("Testing fan - 1/2 speed", self.display)
+        self.display.add_text_line("Testing fan - 1/2 speed")
         flash_led(10, 5)
         self.set_speed(1)
-        print_to_startup_display("Testing fan - full speed", self.display)
+        self.display.add_text_line("Testing fan - full speed")
         flash_led(20, 10)
     
     def switch_on(self) -> None:

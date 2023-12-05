@@ -9,18 +9,17 @@ import urequests
 import config
 from ulogging import uLogger
 from display import Display
-from helpers import print_to_startup_display
 
 class Weather_API:
     """
     Class for interacting with the Open_Meteo API
     """
-    def __init__(self, log_level: int, display: Display|None) -> None:
+    def __init__(self, log_level: int, display: Display) -> None:
         self.logger = uLogger("Open-Meteo", log_level)
         self.display = display
         self.latlong = config.lat_long
-        print_to_startup_display("Init weather API", self.display)
-        print_to_startup_display(f"LatLong: {self.latlong}", self.display)
+        self.display.add_text_line("Init weather API")
+        self.display.add_text_line(f"LatLong: {self.latlong}")
         self.baseurl = "https://api.open-meteo.com/v1/forecast?latitude={}&longitude={}".format(self.latlong[0], self.latlong[1])
         self.parameters = "&hourly=temperature_2m,dewpoint_2m,relative_humidity_2m,weathercode,pressure_msl,windspeed_10m,winddirection_10m,windgusts_10m&current_weather=true&past_days=1&forecast_days=1&windspeed_unit=kn&timezone=GB&timeformat=unixtime"
         self.url = self.baseurl + self.parameters
@@ -91,8 +90,5 @@ class Weather_API:
         
         self.logger.info(weather)
         
-        # if self.debugging:
-        #     for parameter in weather:
-        #         print(parameter, ":", weather[parameter])
-        
         return weather
+    

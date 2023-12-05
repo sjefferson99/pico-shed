@@ -6,12 +6,12 @@ from ubinascii import hexlify
 import config
 from machine import Pin
 from ulogging import uLogger
-from helpers import flash_led, print_to_startup_display
+from helpers import flash_led
 from display import Display
 
 class Wireless_Network:
 
-    def __init__(self, log_level: int, display: Display|None) -> None:
+    def __init__(self, log_level: int, display: Display) -> None:
         self.logger = uLogger("WIFI", log_level)
         self.display = display
         self.wifi_ssid = config.wifi_ssid
@@ -42,13 +42,13 @@ class Wireless_Network:
         self.configure_wifi()
 
     def configure_wifi(self) -> None:
-        print_to_startup_display("Configuring WiFi", self.display)
+        self.display.add_text_line("Configuring WiFi")
         self.wlan = network.WLAN(network.STA_IF)
         self.wlan.active(True)
         self.wlan.config(pm=self.disable_power_management)
         mac = hexlify(self.wlan.config('mac'),':').decode()
         self.logger.info("MAC: " + mac)
-        print_to_startup_display(f"MAC: {mac}", self.display)
+        self.display.add_text_line(f"MAC: {mac}")
     
     def dump_status(self):
         status = self.wlan.status()

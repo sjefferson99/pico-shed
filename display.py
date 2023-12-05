@@ -8,6 +8,13 @@ class Display:
     def __init__(self, log_level: int) -> None:
         self.logger = uLogger("Display", log_level)
         self.logger.info("Init Display")
+        self.enabled = config.display_enabled
+        if self.enabled:
+            self.init_display()
+        else:
+            self.logger.info("Display disabled in config")
+
+    def init_display(self) -> None:
         self.display = PicoGraphics(display=DISPLAY_PICO_DISPLAY, pen_type=PEN_RGB332, rotate=0)
         self.auto_page_scroll_pause = config.auto_page_scroll_pause
         self.GREEN = self.display.create_pen(0, 255, 0)
@@ -39,6 +46,7 @@ class Display:
         self.display.set_pen(self.BACKGROUND)
         self.display.clear()
         self.current_y = self.top_margin
+        self.display.update()
 
     def print_startup_text(self) -> None:
         self.clear_screen()
@@ -60,22 +68,25 @@ class Display:
         return line_count
     
     def add_text_line(self, text: str) -> None:
-        next_y_start = self.current_y
-        next_y_end = next_y_start + (((self.font_height * self.normal_font_scale) + self.line_spacing) * self.get_text_line_count(text, self.normal_font_scale))
-        self.logger.info(f"Calculated next_y_end: {next_y_end}")
-        
-        if next_y_end > (self.HEIGHT - self.bottom_margin):
-            sleep(self.auto_page_scroll_pause)
-            self.clear_screen()
+        if self.enabled:
             next_y_start = self.current_y
             next_y_end = next_y_start + (((self.font_height * self.normal_font_scale) + self.line_spacing) * self.get_text_line_count(text, self.normal_font_scale))
-            self.logger.info(f"Reset to top of page and calculated next_y_end: {next_y_end}")
-        
-        self.display.set_pen(self.WHITE)
-        self.display.text(text, self.left_margin, next_y_start, self.useable_width, self.normal_font_scale)
-        self.display.update()
-        self.current_y = next_y_end
-        self.logger.info(f"Current_y now set to : {self.current_y}")
+            self.logger.info(f"Calculated next_y_end: {next_y_end}")
+            
+            if next_y_end > (self.HEIGHT - self.bottom_margin):
+                sleep(self.auto_page_scroll_pause)
+                self.clear_screen()
+                next_y_start = self.current_y
+                next_y_end = next_y_start + (((self.font_height * self.normal_font_scale) + self.line_spacing) * self.get_text_line_count(text, self.normal_font_scale))
+                self.logger.info(f"Reset to top of page and calculated next_y_end: {next_y_end}")
+            
+            self.display.set_pen(self.WHITE)
+            self.display.text(text, self.left_margin, next_y_start, self.useable_width, self.normal_font_scale)
+            self.display.update()
+            self.current_y = next_y_end
+            self.logger.info(f"Current_y now set to : {self.current_y}")
+        else:
+            self.logger.info(f"Display text not shown as display disabled: {text}")
 
     def update_display_values(self, display_data: dict) -> None:
         for key in display_data:
@@ -85,9 +96,12 @@ class Display:
                 self.logger.warn("Invalid display update item")
 
     def update_main_display(self, display_data: dict = {}) -> None:
-        self.update_display_values(display_data)
-        self.clear_screen()
-        self.add_text_line(f"Indoor humidity: {self.display_data['indoor_humidity']}")
-        self.add_text_line(f"Outdoor humidity: {self.display_data['outdoor_humidity']}")
-        self.add_text_line(f"Fan speed: {self.display_data['fan_speed']}")
-        self.add_text_line(f"Network Status: {self.display_data['wifi_status']}")
+        if self.enabled:
+            self.update_display_values(display_data)
+            self.clear_screen()
+            self.add_text_line(f"Indoor humidity: {self.display_data['indoor_humidity']}")
+            self.add_text_line(f"Outdoor humidity: {self.display_data['outdoor_humidity']}")
+            self.add_text_line(f"Fan speed: {self.display_data['fan_speed']}")
+            self.add_text_line(f"Network Status: {self.display_data['wifi_status']}")
+        else:
+            self.logger.info(f"Display update not shown as display disabled: {display_data}")

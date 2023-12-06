@@ -1,11 +1,5 @@
-from time import sleep
-import config
-from fan import Fan
+from environment import Environment
 
-fan = Fan(log_level=0)
+env = Environment(log_level=0)
 
-while True:
-
-    fan.assess_fan_state()
-
-    sleep(config.weather_poll_frequency_in_seconds)
+env.main_loop()

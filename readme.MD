@@ -17,6 +17,28 @@ The fan pin should be run through a transistor and not directly connected for cu
 - Hysteresis on fan state change
 - PWM fan speed control based on humidity differential
 - Fan startup test with LED feedback
+- Pico display pack support (tested with [Pico Dsiplay Pack 240x135](https://shop.pimoroni.com/products/pico-display-pack?variant=32368664215635)) 
+  - Startup information 
+  - Indoor humidity
+  - Outdoor humidity
+  - Fan speed
+  - Network status
+  - Configurable backlight timeout
+
+##  Firmware
+This code requires the Pimoroni micropython firmware and was written on [v1.21.0](https://github.com/pimoroni/pimoroni-pico/releases/tag/v1.21.0)
+
+## Hardware
+Pico W with standard header pins is attached via the stacking headers (to allow easy removal of the Pico) to a pico display, sandwiching a pico proto board between allowing breakout of the I2C and GPIO output controls.
+
+- [Pico W](https://shop.pimoroni.com/products/raspberry-pi-pico-w?variant=40059369619539)
+- [Pico Display Pack](https://shop.pimoroni.com/products/pico-display-pack?variant=32368664215635)
+- [Pico Proto](https://shop.pimoroni.com/products/pico-proto?variant=32369530110035)
+- [Pico stacking headers](https://shop.pimoroni.com/products/pico-stacking-headers?variant=39272657682515)
+- [BME280](https://shop.pimoroni.com/products/bme280-breakout?variant=29420960677971)
+- [JST connectors](https://www.amazon.co.uk/gp/product/B09LQGDHV2)
+- [PWM transistor](https://www.amazon.co.uk/gp/product/B07QVZK39F)
+- [Transistor heatsinks](https://www.amazon.co.uk/gp/product/B081GS15N6)
 
 ## Execution order
 1. Fan test

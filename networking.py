@@ -7,11 +7,13 @@ import config
 from machine import Pin
 from ulogging import uLogger
 from helpers import flash_led
+from display import Display
 
 class Wireless_Network:
 
-    def __init__(self, log_level: int) -> None:
+    def __init__(self, log_level: int, display: Display) -> None:
         self.logger = uLogger("WIFI", log_level)
+        self.display = display
         self.wifi_ssid = config.wifi_ssid
         self.wifi_password = config.wifi_password
         self.wifi_country = config.wifi_country
@@ -40,11 +42,13 @@ class Wireless_Network:
         self.configure_wifi()
 
     def configure_wifi(self) -> None:
+        self.display.add_text_line("Configuring WiFi")
         self.wlan = network.WLAN(network.STA_IF)
         self.wlan.active(True)
         self.wlan.config(pm=self.disable_power_management)
         mac = hexlify(self.wlan.config('mac'),':').decode()
         self.logger.info("MAC: " + mac)
+        self.display.add_text_line(f"MAC: {mac}")
     
     def dump_status(self):
         status = self.wlan.status()
@@ -80,11 +84,13 @@ class Wireless_Network:
         if elapsed_ms > 5000:
             self.logger.warn(f"took {elapsed_ms} milliseconds to connect to wifi")
 
-    def led_connection_error(self) -> None:
+    def connection_error(self) -> None:
         flash_led(2, 2)
+        self.display.update_main_display({"wifi_status": "Error"})
 
-    def led_connection_success(self) -> None:
+    def connection_success(self) -> None:
         flash_led(1, 2)
+        self.display.update_main_display({"wifi_status": "Connected"})
 
     def attempt_ap_connect(self) -> None:
         self.logger.info(f"Connecting to SSID {self.wifi_ssid} (password: {self.wifi_password})...")
@@ -93,9 +99,9 @@ class Wireless_Network:
         try:
             self.wait_status(self.CYW43_LINK_UP)
         except Exception as x:
-            self.led_connection_error()
+            self.connection_error()
             raise Exception(f"Failed to connect to SSID {self.wifi_ssid} (password: {self.wifi_password}): {x}")
-        self.led_connection_success()
+        self.connection_success()
         self.logger.info("Connected successfully!")
     
     def connect_wifi(self) -> None:

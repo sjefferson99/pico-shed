@@ -1,6 +1,6 @@
-# Pico-shed
+# Pico environment control
 ## Introduction
-Environmental reporting and control for a shed or any similar space
+Environmental reporting and control for sheds or similar spaces.
 
 ## Features
 First version is simply to control the induction fan on my shed to only run when the humidity outside is dryer than the humidity inside the shed to keep the enviroment as dry as possible.

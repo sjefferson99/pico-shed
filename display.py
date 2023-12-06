@@ -102,9 +102,9 @@ class Display:
             self.update_main_display_values(display_data)
             if self.mode == "main":
                 self.clear_screen()
-                self.add_text_line(f"Indoor humidity: {self.display_data['indoor_humidity']}")
-                self.add_text_line(f"Outdoor humidity: {self.display_data['outdoor_humidity']}")
-                self.add_text_line(f"Fan speed: {self.display_data['fan_speed']}")
-                self.add_text_line(f"Network Status: {self.display_data['wifi_status']}")
+                self.add_text_line(f"IH: {self.display_data['indoor_humidity']}")
+                self.add_text_line(f"OH: {self.display_data['outdoor_humidity']}")
+                self.add_text_line(f"Fan: {self.display_data['fan_speed']}")
+                self.add_text_line(f"Net: {self.display_data['wifi_status']}")
         else:
             self.logger.info(f"Display update not shown as display disabled: {display_data}")

@@ -77,6 +77,7 @@ class Fan:
         if network_access == True:
             self.weather_data = self.weather.get_weather()
             self.readings = self.sensor.get_readings()
+            self.display.update_main_display({"indoor_humidity": self.readings["humidity"], "outdoor_humidity": self.weather_data["humidity"]})
             self.set_fan_from_humidity(self.readings["humidity"], self.weather_data["humidity"])
 
     def network_retry_backoff(self) -> None:

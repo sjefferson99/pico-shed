@@ -87,8 +87,7 @@ class Weather_API:
             weather["offset_wind_gusts"] = data["windgusts_10m"][offset_hour]
             weather["offset_weather_description"] = self.lookup_weather_code(weather["offset_weather_code"])
 
-        
         self.logger.info(weather)
-        
+
         return weather
     

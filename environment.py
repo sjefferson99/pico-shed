@@ -11,19 +11,21 @@ class Environment:
         self.display = Display(self.log_level)
         self.fan = Fan(self.log_level, self.display)
         sleep(config.auto_page_scroll_pause)
+        self.display.mode = "main"
         self.display.update_main_display()
 
-    def get_cached_indoor_humidity(self) -> float:
-        try:
-            return self.fan.readings["humidity"]
-        except:
-            return False
+    # Not used yet - maybe never?
+    # def get_cached_indoor_humidity(self) -> float:
+    #     try:
+    #         return self.fan.readings["humidity"]
+    #     except:
+    #         return False
     
-    def get_cached_outdoor_humidity(self) -> float:
-        try:
-            return self.fan.weather_data["humidity"]
-        except:
-            return False
+    # def get_cached_outdoor_humidity(self) -> float:
+    #     try:
+    #         return self.fan.weather_data["humidity"]
+    #     except:
+    #         return False
     
     def assess_fan_state(self) -> None:
         self.fan.assess_fan_state()

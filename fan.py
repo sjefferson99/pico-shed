@@ -1,7 +1,7 @@
 from machine import Pin, PWM
 import config
 from networking import Wireless_Network
-from helpers import flash_led
+from helpers import flash_led, decimal_to_percent_str
 from open_meteo import Weather_API
 from bme_280 import BME_280
 from ulogging import uLogger
@@ -50,6 +50,7 @@ class Fan:
         duty = int(self.max_pwm_duty * speed)
         self.fan_pwm_pin.duty_u16(duty)
         self.logger.info(f"Fan speed set to speed {speed}, which is duty {duty}")
+        self.display.update_main_display({"fan_speed": decimal_to_percent_str(speed)})
     
     def calculate_required_fan_speed(self, inside_humidity, outside_humidity) -> float:
         speed = 0

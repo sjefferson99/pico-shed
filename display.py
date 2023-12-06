@@ -37,6 +37,7 @@ class Display:
         self.startup_display()
     
     def startup_display(self) -> None:
+        self.mode = "startup"
         self.logger.info("Startup Display")
         self.rgb_led = RGBLED(2, 0, 0)
         self.display.set_backlight(1.0)
@@ -99,10 +100,11 @@ class Display:
     def update_main_display(self, display_data: dict = {}) -> None:
         if self.enabled:
             self.update_main_display_values(display_data)
-            self.clear_screen()
-            self.add_text_line(f"Indoor humidity: {self.display_data['indoor_humidity']}")
-            self.add_text_line(f"Outdoor humidity: {self.display_data['outdoor_humidity']}")
-            self.add_text_line(f"Fan speed: {self.display_data['fan_speed']}")
-            self.add_text_line(f"Network Status: {self.display_data['wifi_status']}")
+            if self.mode == "main":
+                self.clear_screen()
+                self.add_text_line(f"Indoor humidity: {self.display_data['indoor_humidity']}")
+                self.add_text_line(f"Outdoor humidity: {self.display_data['outdoor_humidity']}")
+                self.add_text_line(f"Fan speed: {self.display_data['fan_speed']}")
+                self.add_text_line(f"Network Status: {self.display_data['wifi_status']}")
         else:
             self.logger.info(f"Display update not shown as display disabled: {display_data}")

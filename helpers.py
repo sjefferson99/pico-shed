@@ -12,3 +12,8 @@ def flash_led(count: int, hz: float) -> None:
         status_led.on()
         sleep(sleep_duration)
         status_led.off()
+
+def decimal_to_percent_str(decimal) -> str:
+    value = decimal * 100
+    string = str(value) + "%"
+    return string

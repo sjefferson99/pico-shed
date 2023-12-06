@@ -88,16 +88,17 @@ class Display:
         else:
             self.logger.info(f"Display text not shown as display disabled: {text}")
 
-    def update_display_values(self, display_data: dict) -> None:
+    def update_main_display_values(self, display_data: dict) -> None:
         for key in display_data:
             if key in self.display_data:
                 self.display_data[key] = display_data[key]
+                self.logger.info(f"Updating display item {key} to {display_data[key]}")
             else:
                 self.logger.warn("Invalid display update item")
 
     def update_main_display(self, display_data: dict = {}) -> None:
         if self.enabled:
-            self.update_display_values(display_data)
+            self.update_main_display_values(display_data)
             self.clear_screen()
             self.add_text_line(f"Indoor humidity: {self.display_data['indoor_humidity']}")
             self.add_text_line(f"Outdoor humidity: {self.display_data['outdoor_humidity']}")

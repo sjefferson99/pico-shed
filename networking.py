@@ -84,11 +84,13 @@ class Wireless_Network:
         if elapsed_ms > 5000:
             self.logger.warn(f"took {elapsed_ms} milliseconds to connect to wifi")
 
-    def led_connection_error(self) -> None:
+    def connection_error(self) -> None:
         flash_led(2, 2)
+        self.display.update_main_display({"wifi_status": "Error"})
 
-    def led_connection_success(self) -> None:
+    def connection_success(self) -> None:
         flash_led(1, 2)
+        self.display.update_main_display({"wifi_status": "Connected"})
 
     def attempt_ap_connect(self) -> None:
         self.logger.info(f"Connecting to SSID {self.wifi_ssid} (password: {self.wifi_password})...")
@@ -97,9 +99,9 @@ class Wireless_Network:
         try:
             self.wait_status(self.CYW43_LINK_UP)
         except Exception as x:
-            self.led_connection_error()
+            self.connection_error()
             raise Exception(f"Failed to connect to SSID {self.wifi_ssid} (password: {self.wifi_password}): {x}")
-        self.led_connection_success()
+        self.connection_success()
         self.logger.info("Connected successfully!")
     
     def connect_wifi(self) -> None:

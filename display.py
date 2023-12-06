@@ -3,6 +3,7 @@ from pimoroni import RGBLED
 from ulogging import uLogger
 import config
 from time import sleep
+from utime import ticks_ms
 
 class Display:
     def __init__(self, log_level: int) -> None:
@@ -40,20 +41,38 @@ class Display:
         self.mode = "startup"
         self.logger.info("Startup Display")
         self.rgb_led = RGBLED(2, 0, 0)
-        self.display.set_backlight(1.0)
+        self.backlight_on()
         self.print_startup_text()
+
+    def backlight_on(self) -> None:
+        self.logger.info("Backlight on")
+        self.display.set_backlight(1.0)
+        self.backlight_on_time_ms = ticks_ms()
+
+    def backlight_off(self) -> None:
+        self.logger.info("Backlight off")
+        self.display.set_backlight(0)
+        self.backlight_on_time_ms = 0
+    
+    def check_backlight(self) -> None:
+        if self.backlight_on_time_ms > 0 and (self.backlight_on_time_ms + (config.backlight_timeout_s * 1000)) < ticks_ms():
+            self.backlight_off()
+
+    def update_display(self) -> None:
+        self.backlight_on()
+        self.display.update()
 
     def clear_screen(self) -> None:
         self.display.set_pen(self.BACKGROUND)
         self.display.clear()
         self.current_y = self.top_margin
-        self.display.update()
+        self.update_display()
 
     def print_startup_text(self) -> None:
         self.clear_screen()
         self.display.set_pen(self.WHITE)
         self.display.text("Starting up...", self.left_margin, self.top_margin, self.useable_width, self.header_font_scale)
-        self.display.update()
+        self.update_display()
         self.current_y = self.current_y + (self.header_font_scale * self.font_height) + self.line_spacing
     
     def get_text_line_count(self, text: str, scale: float) -> int:
@@ -83,7 +102,7 @@ class Display:
             
             self.display.set_pen(self.WHITE)
             self.display.text(text, self.left_margin, next_y_start, self.useable_width, self.normal_font_scale)
-            self.display.update()
+            self.update_display()
             self.current_y = next_y_end
             self.logger.info(f"Current_y now set to : {self.current_y}")
         else:

@@ -1,7 +1,7 @@
 from fan import Fan
 from display import Display
 from ulogging import uLogger
-from time import sleep
+from time import sleep, time
 import config
 
 class Environment:
@@ -13,19 +13,15 @@ class Environment:
         sleep(config.auto_page_scroll_pause)
         self.display.mode = "main"
         self.display.update_main_display()
+        self.last_weather_poll_s = 0
 
-    # Not used yet - maybe never?
-    # def get_cached_indoor_humidity(self) -> float:
-    #     try:
-    #         return self.fan.readings["humidity"]
-    #     except:
-    #         return False
-    
-    # def get_cached_outdoor_humidity(self) -> float:
-    #     try:
-    #         return self.fan.weather_data["humidity"]
-    #     except:
-    #         return False
+    def main_loop(self) -> None:
+        while True:
+            if self.last_weather_poll_s < (time() - config.weather_poll_frequency_in_seconds):
+                self.last_weather_poll_s = time()
+                self.assess_fan_state()
+            
+            self.display.check_backlight() # Not perfect, but fairly close - need uasyncio or interrupts or similar magic.
     
     def assess_fan_state(self) -> None:
         self.fan.assess_fan_state()

@@ -23,4 +23,5 @@ humidity_hysteresis_pc = 1
 ## Display options
 display_enabled = True
 # Seconds to pause each auto scrolling information page for troubleshooting (usually startup)
-auto_page_scroll_pause = 2
+auto_page_scroll_pause = 0
+backlight_timeout_s = 5

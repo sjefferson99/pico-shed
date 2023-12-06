@@ -17,6 +17,13 @@ The fan pin should be run through a transistor and not directly connected for cu
 - Hysteresis on fan state change
 - PWM fan speed control based on humidity differential
 - Fan startup test with LED feedback
+- Pico display pack support (tested with [Pico Dsiplay Pack 240x135](https://shop.pimoroni.com/products/pico-display-pack?variant=32368664215635)) 
+  - Startup information 
+  - Indoor humidity
+  - Outdoor humidity
+  - Fan speed
+  - Network status
+  - Configurable backlight timeout
 
 ##  Firmware
 This code requires the Pimoroni micropython firmware and was written on [v1.21.0](https://github.com/pimoroni/pimoroni-pico/releases/tag/v1.21.0)

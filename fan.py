@@ -24,13 +24,14 @@ class Fan:
     
     def fan_test(self) -> None:
         self.logger.info("Testing fan")
-        self.display.add_text_line("Testing fan")
-        self.set_speed(0.1)
-        self.display.add_text_line("Testing fan - 1/10 speed")
-        flash_led(4, 2)
-        self.set_speed(0.5)
-        self.display.add_text_line("Testing fan - 1/2 speed")
-        flash_led(10, 5)
+        if config.enable_PWM_fan_speed:
+            self.display.add_text_line("Testing fan")
+            self.set_speed(0.1)
+            self.display.add_text_line("Testing fan - 1/10 speed")
+            flash_led(4, 2)
+            self.set_speed(0.5)
+            self.display.add_text_line("Testing fan - 1/2 speed")
+            flash_led(10, 5)
         self.set_speed(1)
         self.display.add_text_line("Testing fan - full speed")
         flash_led(20, 10)
@@ -56,7 +57,10 @@ class Fan:
         speed = 0
         humidity_difference = inside_humidity - (outside_humidity + self.humidity_hysteresis_pc)
         if humidity_difference > 0:
-            speed = min(1, (humidity_difference / 10))
+            if config.enable_PWM_fan_speed:
+                speed = min(1, (humidity_difference / 10))
+            else:
+                speed = 1
         self.logger.info(f"calculated fan speed is {speed}")
         return speed
     

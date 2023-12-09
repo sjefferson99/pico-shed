@@ -16,6 +16,7 @@ The fan pin should be run through a transistor and not directly connected for cu
 - Ensures network for API calls with configurable retries 
 - Hysteresis on fan state change
 - PWM fan speed control based on humidity differential
+- Disable PWM option for relays or fans that don't suport it
 - Fan startup test with LED feedback
 - Pico display pack support (tested with [Pico Dsiplay Pack 240x135](https://shop.pimoroni.com/products/pico-display-pack?variant=32368664215635)) 
   - Startup information 

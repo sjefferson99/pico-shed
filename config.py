@@ -19,6 +19,7 @@ fan_gpio_pin = 2
 
 # How much dryer outside before the fan turns on
 humidity_hysteresis_pc = 1
+enable_PWM_fan_speed = False
 
 ## Display options
 display_enabled = True

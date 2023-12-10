@@ -6,6 +6,7 @@ from open_meteo import Weather_API
 from bme_280 import BME_280
 from ulogging import uLogger
 from display import Display
+import uasyncio
 
 class Fan:
     def __init__(self, log_level: int, display: Display) -> None:
@@ -83,6 +84,11 @@ class Fan:
             self.readings = self.sensor.get_readings()
             self.display.update_main_display({"indoor_humidity": self.readings["humidity"], "outdoor_humidity": self.weather_data["humidity"]})
             self.set_fan_from_humidity(self.readings["humidity"], self.weather_data["humidity"])
+        
+    async def start_fan_management(self) -> None:
+        while True:
+            self.assess_fan_state()
+            await uasyncio.sleep(config.weather_poll_frequency_in_seconds)
 
     def network_retry_backoff(self) -> None:
         self.logger.info(f"Backing off retry for {config.wifi_retry_backoff_seconds} seconds")

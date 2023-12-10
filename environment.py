@@ -3,6 +3,7 @@ from display import Display
 from ulogging import uLogger
 from time import sleep, time
 import config
+import uasyncio
 
 class Environment:
     def __init__(self, log_level: int) -> None:
@@ -15,13 +16,13 @@ class Environment:
         self.display.update_main_display()
         self.last_weather_poll_s = 0
 
-    def main_loop(self) -> None:
+    async def main_loop(self) -> None:
+        uasyncio.create_task(self.display.backlight_timeout())
+        uasyncio.create_task(self.fan.start_fan_management())
+
         while True:
-            if self.last_weather_poll_s < (time() - config.weather_poll_frequency_in_seconds):
-                self.last_weather_poll_s = time()
-                self.assess_fan_state()
-            
-            self.display.check_backlight() # Not perfect, but fairly close - need uasyncio or interrupts or similar magic.
+            self.logger.info("In main loop")
+            await uasyncio.sleep(1)
     
-    def assess_fan_state(self) -> None:
-        self.fan.assess_fan_state()
+    def start(self) -> None:
+        uasyncio.run(self.main_loop())

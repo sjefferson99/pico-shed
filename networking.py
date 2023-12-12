@@ -4,15 +4,15 @@ import rp2
 import network
 from ubinascii import hexlify
 import config
-from machine import Pin
 from ulogging import uLogger
-from helpers import flash_led
+from lib.helpers import Status_LED
 from display import Display
 
 class Wireless_Network:
 
     def __init__(self, log_level: int, display: Display) -> None:
         self.logger = uLogger("WIFI", log_level)
+        self.status_led = Status_LED(log_level)
         self.display = display
         self.wifi_ssid = config.wifi_ssid
         self.wifi_password = config.wifi_password
@@ -84,31 +84,31 @@ class Wireless_Network:
         if elapsed_ms > 5000:
             self.logger.warn(f"took {elapsed_ms} milliseconds to connect to wifi")
 
-    def connection_error(self) -> None:
-        flash_led(2, 2)
+    async def connection_error(self) -> None:
+        await self.status_led.flash(2, 2)
         self.display.update_main_display({"wifi_status": "Error"})
 
-    def connection_success(self) -> None:
-        flash_led(1, 2)
+    async def connection_success(self) -> None:
+        await self.status_led.flash(1, 2)
         self.display.update_main_display({"wifi_status": "Connected"})
 
-    def attempt_ap_connect(self) -> None:
+    async def attempt_ap_connect(self) -> None:
         self.logger.info(f"Connecting to SSID {self.wifi_ssid} (password: {self.wifi_password})...")
         self.disconnect_wifi_if_necessary()
         self.wlan.connect(self.wifi_ssid, self.wifi_password)
         try:
             self.wait_status(self.CYW43_LINK_UP)
         except Exception as x:
-            self.connection_error()
+            await self.connection_error()
             raise Exception(f"Failed to connect to SSID {self.wifi_ssid} (password: {self.wifi_password}): {x}")
-        self.connection_success()
+        await self.connection_success()
         self.logger.info("Connected successfully!")
     
-    def connect_wifi(self) -> None:
+    async def connect_wifi(self) -> None:
         self.logger.info("Connecting to wifi")
         start_ms = ticks_ms()
         try:
-            self.attempt_ap_connect()
+            await self.attempt_ap_connect()
         except Exception:
             raise Exception(f"Failed to connect to network")
 

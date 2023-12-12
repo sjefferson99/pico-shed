@@ -17,7 +17,8 @@ class Environment:
         self.last_weather_poll_s = 0
 
     async def main_loop(self) -> None:
-        uasyncio.create_task(self.display.backlight_timeout())
+        uasyncio.create_task(self.display.manage_backlight_timeout())
+        await self.fan.fan_test()
         uasyncio.create_task(self.fan.start_fan_management())
 
         while True:

@@ -59,7 +59,7 @@ class Display:
         if self.backlight_on_time_ms > 0 and (self.backlight_on_time_ms + (config.backlight_timeout_s * 1000)) < ticks_ms():
                 self.backlight_off()
     
-    async def backlight_timeout(self) -> None:
+    async def manage_backlight_timeout(self) -> None:
         while True:
             self.check_backlight()
             await uasyncio.sleep_ms(1)

@@ -112,7 +112,7 @@ class Fan:
                 retries += 1
                 await self.network_retry_backoff()
 
-        if self.wlan.get_status == 3:
+        if self.wlan.get_status() == 3:
             self.logger.info("Connected to wireless network")
             return True
         else:

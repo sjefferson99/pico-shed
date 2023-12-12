@@ -9,6 +9,7 @@ import urequests
 import config
 from ulogging import uLogger
 from display import Display
+import gc
 
 class Weather_API:
     """
@@ -39,6 +40,7 @@ class Weather_API:
         Get weather information for a configured location as of now and offset_hours in the past to a maximum of 24
         Returns a dictionary of weather information with human readable key names - Nautical metric units.
         """
+        gc.collect()
         weather = {}
         self.logger.info(self.url)
         response = urequests.get(self.url)
@@ -49,6 +51,9 @@ class Weather_API:
             weather = self.process_weather(loads(response.text), offset_hours)
         else:
             self.logger.error("Failure to get weather data.\nStatus code: {}\nResponse text: {}".format(response.status_code, response.text))
+
+        response.close()
+        gc.collect()
 
         return weather
 

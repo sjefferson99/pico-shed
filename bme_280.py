@@ -16,6 +16,7 @@ class BME_280:
         self.display.add_text_line(f"I2c Pins: scl: {config.i2c_pins['scl']} sda: {config.i2c_pins['sda']}")
         self.i2c = PimoroniI2C(**config.i2c_pins)
         self.bme = BreakoutBME280(self.i2c)
+        self.get_readings() # Clear incorrect first value after startup
 
     def get_readings(self) -> dict:
         temperature, pressure, humidity = self.bme.read()

@@ -16,14 +16,10 @@ class Environment:
         self.display.update_main_display()
         self.last_weather_poll_s = 0
 
-    async def main_loop(self) -> None:
-        uasyncio.create_task(self.display.manage_backlight_timeout())
-        await self.fan.fan_test()
-        uasyncio.create_task(self.fan.start_fan_management())
+    def main_loop(self) -> None:
+        uasyncio.run_until_complete(self.fan.fan_test())
 
-        while True:
-            self.logger.info("In main loop")
-            await uasyncio.sleep(1)
-    
-    def start(self) -> None:
-        uasyncio.run(self.main_loop())
+        loop = uasyncio.get_event_loop()
+        uasyncio.create_task(self.display.manage_backlight_timeout())
+        uasyncio.create_task(self.fan.start_fan_management())
+        loop.run_forever()

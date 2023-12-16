@@ -4,6 +4,7 @@ from ulogging import uLogger
 import config
 from time import sleep
 from utime import ticks_ms
+import uasyncio
 
 class Display:
     def __init__(self, log_level: int) -> None:
@@ -56,7 +57,12 @@ class Display:
     
     def check_backlight(self) -> None:
         if self.backlight_on_time_ms > 0 and (self.backlight_on_time_ms + (config.backlight_timeout_s * 1000)) < ticks_ms():
-            self.backlight_off()
+                self.backlight_off()
+    
+    async def manage_backlight_timeout(self) -> None:
+        while True:
+            self.check_backlight()
+            await uasyncio.sleep_ms(1)
 
     def update_display(self) -> None:
         self.backlight_on()

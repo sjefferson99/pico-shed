@@ -25,6 +25,7 @@ The fan pin should be run through a transistor and not directly connected for cu
   - Fan speed
   - Network status
   - Configurable backlight timeout
+- With the exception of the requests for weather API (currently stumped on micropython support for aiohttp or threaded asyncio), code is compatible with AsyncIO
 
 ##  Firmware
 This code requires the Pimoroni micropython firmware and was written on [v1.21.0](https://github.com/pimoroni/pimoroni-pico/releases/tag/v1.21.0)

@@ -7,6 +7,7 @@ import config
 from ulogging import uLogger
 from lib.helpers import Status_LED
 from display import Display
+import uasyncio
 
 class Wireless_Network:
 
@@ -55,9 +56,9 @@ class Wireless_Network:
         self.logger.info(f"active: {1 if self.wlan.active() else 0}, status: {status} ({self.status_names[status]})")
         return status
     
-    def wait_status(self, expected_status, *, timeout=config.wifi_connect_timeout_seconds, tick_sleep=0.5) -> bool:
+    async def wait_status(self, expected_status, *, timeout=config.wifi_connect_timeout_seconds, tick_sleep=0.5) -> bool:
         for unused in range(ceil(timeout / tick_sleep)):
-            sleep(tick_sleep)
+            await uasyncio.sleep(tick_sleep)
             status = self.dump_status()
             if status == expected_status:
                 return True
@@ -65,13 +66,13 @@ class Wireless_Network:
                 raise Exception(self.status_names[status])
         return False
     
-    def disconnect_wifi_if_necessary(self) -> None:
+    async def disconnect_wifi_if_necessary(self) -> None:
         status = self.dump_status()
         if status >= self.CYW43_LINK_JOIN and status <= self.CYW43_LINK_UP:
             self.logger.info("Disconnecting...")
             self.wlan.disconnect()
             try:
-                self.wait_status(self.CYW43_LINK_DOWN)
+                await self.wait_status(self.CYW43_LINK_DOWN)
             except Exception as x:
                 raise Exception(f"Failed to disconnect: {x}")
         self.logger.info("Ready for connection!")
@@ -94,10 +95,10 @@ class Wireless_Network:
 
     async def attempt_ap_connect(self) -> None:
         self.logger.info(f"Connecting to SSID {self.wifi_ssid} (password: {self.wifi_password})...")
-        self.disconnect_wifi_if_necessary()
+        await self.disconnect_wifi_if_necessary()
         self.wlan.connect(self.wifi_ssid, self.wifi_password)
         try:
-            self.wait_status(self.CYW43_LINK_UP)
+            await self.wait_status(self.CYW43_LINK_UP)
         except Exception as x:
             await self.connection_error()
             raise Exception(f"Failed to connect to SSID {self.wifi_ssid} (password: {self.wifi_password}): {x}")

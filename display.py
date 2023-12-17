@@ -15,6 +15,11 @@ class Display:
             self.init_display()
         else:
             self.logger.info("Display disabled in config")
+    
+        self.BUTTON_A = 12
+        self.BUTTON_B = 13
+        self.BUTTON_X = 14
+        self.BUTTON_Y = 15
 
     def init_display(self) -> None:
         self.display = PicoGraphics(display=DISPLAY_PICO_DISPLAY, pen_type=PEN_RGB332, rotate=0)

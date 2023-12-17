@@ -20,7 +20,6 @@ class Wireless_Network:
         self.wifi_country = config.wifi_country
         rp2.country(self.wifi_country)
         self.disable_power_management = 0xa11140
-        self.status_led_enable = config.wifi_status_led
         
         # Reference: https://datasheets.raspberrypi.com/picow/connecting-to-the-internet-with-pico-w.pdf
         self.CYW43_LINK_DOWN = 0

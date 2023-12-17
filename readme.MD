@@ -27,8 +27,18 @@ The fan pin should be run through a transistor and not directly connected for cu
   - Configurable backlight timeout
 - With the exception of the requests for weather API (currently stumped on micropython support for aiohttp or threaded asyncio), code is compatible with AsyncIO
 
-##  Firmware
-This code requires the Pimoroni micropython firmware and was written on [v1.21.0](https://github.com/pimoroni/pimoroni-pico/releases/tag/v1.21.0)
+### Installation
+###  Firmware
+This code requires the [Pimoroni MicroPython](https://github.com/pimoroni/pimoroni-pico) firmware and was written on [v1.21.0](https://github.com/pimoroni/pimoroni-pico/releases/tag/v1.21.0).
+
+### Code
+Copy the python files including any folders containing python files to the pico and reset.
+
+### Configuration
+All configuration occurs in config.py, the options have clear names and comments where necessary to explain their functions, with sensible defaults or example data set.
+
+### Troubleshooting
+The default log level is set to 2, with options of: 0 = Disabled, 1 = Critical, 2 = Error, 3 = Warning, 4 = Info. This is set in the init section of each module as an argument, this is inherited from each calling module, so the simplest approach is to enable for all modules by adjusting the log_level parameter of the Environment object instantiation in main.py.
 
 ## Hardware
 Pico W with standard header pins is attached via the stacking headers (to allow easy removal of the Pico) to a pico display, sandwiching a pico proto board between allowing breakout of the I2C and GPIO output controls.

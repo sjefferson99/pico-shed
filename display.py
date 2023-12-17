@@ -60,14 +60,17 @@ class Display:
         self.display.set_backlight(0)
         self.backlight_on_time_ms = 0
     
-    def check_backlight(self) -> None:
+    def should_backlight_be_switched_off(self) -> bool:
         if self.backlight_on_time_ms > 0 and (self.backlight_on_time_ms + (config.backlight_timeout_s * 1000)) < ticks_ms():
-                self.backlight_off()
+            return True
+        else:
+            return False
     
     async def manage_backlight_timeout(self) -> None:
         while True:
-            self.check_backlight()
-            await uasyncio.sleep_ms(1)
+            if self.should_backlight_be_switched_off():
+                self.backlight_off()
+            await uasyncio.sleep(0.1)
 
     def update_display(self) -> None:
         self.backlight_on()

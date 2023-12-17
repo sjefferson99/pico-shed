@@ -26,6 +26,8 @@ The fan pin should be run through a transistor and not directly connected for cu
   - Network status
   - Configurable backlight timeout
 - With the exception of the requests for weather API (currently stumped on micropython support for aiohttp or threaded asyncio), code is compatible with AsyncIO
+- Async button class provides ability to detect button presses and map to function execution 
+- If the backlight is off, only enable backlight on first press of a button
 
 ### Installation
 ###  Firmware

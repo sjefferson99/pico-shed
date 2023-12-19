@@ -5,6 +5,7 @@ from time import sleep
 import config
 import uasyncio
 from lib.button import Button
+from lib.battery import Battery_Monitor
 
 class Environment:
     def __init__(self, log_level: int) -> None:
@@ -19,6 +20,7 @@ class Environment:
         self.buttons = []
         if self.display.enabled:
             self.init_pico_display_buttons()
+        self.battery = Battery_Monitor(log_level)
 
     def init_pico_display_buttons(self) -> None:    
         self.button_a = Button(self.log_level, self.display.BUTTON_A, self.display)
@@ -31,13 +33,27 @@ class Environment:
         uasyncio.run_until_complete(self.fan.fan_test())
 
         loop = uasyncio.get_event_loop()
+        
         uasyncio.create_task(self.display.manage_backlight_timeout())
+        
         if len(self.buttons) > 0:
             self.enable_button_watchers()
             self.button_a.set_function_on_press(Button.test_button_function, [])
+        
+        self.enable_battery_monitor()
+        
         uasyncio.create_task(self.fan.start_fan_management())
         loop.run_forever()
 
     def enable_button_watchers(self) -> None:
         for button in self.buttons:
             uasyncio.create_task(button.wait_for_press())
+    
+    def enable_battery_monitor(self) -> None:
+        uasyncio.create_task(self.battery.poll_battery_voltage())
+        uasyncio.create_task(self.battery_monitor())
+
+    async def battery_monitor(self) -> None:
+        await self.battery.reading_updated.wait()
+        self.battery.reading_updated.clear()
+        self.logger.info(f"{self.battery.last_reading_time}: Battery voltage: {self.battery.last_reading}")

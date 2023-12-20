@@ -57,3 +57,4 @@ class Environment:
         await self.battery.reading_updated.wait()
         self.battery.reading_updated.clear()
         self.logger.info(f"{self.battery.last_reading_time}: Battery voltage: {self.battery.last_reading}")
+        self.display.update_main_display({"battery_voltage": str(round(self.battery.last_reading, 2)) + "v"})

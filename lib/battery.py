@@ -31,4 +31,4 @@ class Battery_Monitor:
             self.last_reading = self.read_battery_voltage()
             self.last_reading_time = time()
             self.reading_updated.set()
-            await uasyncio.sleep(60)
+            await uasyncio.sleep(5)

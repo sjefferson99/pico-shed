@@ -61,7 +61,7 @@ class Display:
         self.backlight_on_time_ms = 0
     
     def should_backlight_be_switched_off(self) -> bool:
-        if self.backlight_on_time_ms > 0 and (self.backlight_on_time_ms + (config.backlight_timeout_s * 1000)) < ticks_ms():
+        if self.backlight_on_time_ms > 0 and (self.backlight_on_time_ms + (config.backlight_timeout_s * 1000)) < ticks_ms() and self.mode != "startup":
             return True
         else:
             return False
@@ -73,7 +73,6 @@ class Display:
             await uasyncio.sleep(0.1)
 
     def update_display(self) -> None:
-        self.backlight_on()
         self.display.update()
 
     def clear_screen(self) -> None:

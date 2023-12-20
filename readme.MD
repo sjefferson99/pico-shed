@@ -63,7 +63,7 @@ Construct the voltage divider according to this circuit diagram and ensure that 
 I am using a 12v battery that will go up to a maximum of 15v when charging. As such I have used values of R1 = 22k and R2 = 5.1k.
 Enter the values of the resistors (If possible, measure with a multimeter and add precise values for improved accuracy) into config.py to correctly scale the battery monitor and also optionally apply an offset if the measured voltage differs from the reported voltage due to ADC reference inaccuracies.
 
-![Voltage divider circuit diagram](docs\images\voltagedivider.png)
+![Voltage divider circuit diagram](docs/images/voltagedivider.png)
 
 
 ## Execution order

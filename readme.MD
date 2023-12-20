@@ -28,6 +28,7 @@ The fan pin should be run through a transistor and not directly connected for cu
 - With the exception of the requests for weather API (currently stumped on micropython support for aiohttp or threaded asyncio), code is compatible with AsyncIO
 - Async button class provides ability to detect button presses and map to function execution 
 - If the backlight is off, only enable backlight on first press of a button
+- Battery voltage monitoring to display
 
 ### Installation
 ###  Firmware
@@ -53,6 +54,17 @@ Pico W with standard header pins is attached via the stacking headers (to allow 
 - [JST connectors](https://www.amazon.co.uk/gp/product/B09LQGDHV2)
 - [PWM transistor](https://www.amazon.co.uk/gp/product/B07QVZK39F)
 - [Transistor heatsinks](https://www.amazon.co.uk/gp/product/B081GS15N6)
+- 2x resistors for voltage divider for measuring battery voltage
+
+### Battery voltage monitoring
+The voltage monitoring is achieved with the onboard ADC that is limited to measuring a maximum of 3.3v, so for higher voltages (I am using a 12v battery), a voltage divider is required.
+Connect the battery ground to ADC ground (pin 33) to improve accuracy and the output of the voltage divider (Vout) to ADC0 (Pin 31/GP 26).
+Construct the voltage divider according to this circuit diagram and ensure that Vout is safely under 3.3v for the maximum voltage you will be monitoring. Double check and ideally test with a multimeter before connecting up, microcontrollers are not friends with large voltages.
+I am using a 12v battery that will go up to a maximum of 15v when charging. As such I have used values of R1 = 22k and R2 = 5.1k.
+Enter the values of the resistors (If possible, measure with a multimeter and add precise values for improved accuracy) into config.py to correctly scale the battery monitor and also optionally apply an offset if the measured voltage differs from the reported voltage due to ADC reference inaccuracies.
+
+![Voltage divider circuit diagram](docs\images\voltagedivider.png)
+
 
 ## Execution order
 1. Fan test

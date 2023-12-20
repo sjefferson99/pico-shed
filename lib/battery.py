@@ -21,12 +21,9 @@ class Battery_Monitor:
         self.logger.info(f"Uncalibrated ADC voltage: {uncalibrated_adc_voltage}")
         uncalibrated_battery_voltage = uncalibrated_adc_voltage * self.scaling_factor
         self.logger.info(f"Uncalibrated battery voltage: {uncalibrated_battery_voltage}")
-        adc_offset = self.voltage_correction / self.scaling_factor
-        self.logger.info(f"ADC calibration offset: {adc_offset}")
-        calibrated_adc_voltage = uncalibrated_adc_voltage + adc_offset
-        self.logger.info(f"Calibrated ADC voltage: {calibrated_adc_voltage}")
-        calibrated_battery_voltage = calibrated_adc_voltage * self.scaling_factor
+        calibrated_battery_voltage = uncalibrated_battery_voltage + self.voltage_correction
         self.logger.info(f"Calibrated battery voltage: {calibrated_battery_voltage}")
+
         return calibrated_battery_voltage
     
     async def poll_battery_voltage(self) -> None:

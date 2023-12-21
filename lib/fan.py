@@ -23,22 +23,22 @@ class Fan:
         self.led_retry_backoff_frequency = 4
         self.humidity_hysteresis_pc = config.humidity_hysteresis_pc
     
-    async def pwm_fan_test(self) -> None:
+    def pwm_fan_test(self) -> None:
         self.set_speed(0.1)
         self.display.add_text_line("Testing fan - 1/10 speed")
-        await self.status_led.flash(4, 2)
+        self.status_led.flash_no_async(4, 2)
         self.set_speed(0.5)
         self.display.add_text_line("Testing fan - 1/2 speed")
-        await self.status_led.flash(10, 5)
+        self.status_led.flash_no_async(10, 5)
     
-    async def fan_test(self) -> None:
+    def fan_test(self) -> None:
         self.logger.info("Testing fan")
         self.display.add_text_line("Testing fan")
         if config.enable_PWM_fan_speed:
-           await self.pwm_fan_test()
+           self.pwm_fan_test()
         self.set_speed(1)
         self.display.add_text_line("Testing fan - full speed")
-        await self.status_led.flash(40, 10)
+        self.status_led.flash_no_async(40, 10)
         self.set_speed(0)
         self.logger.info("Fan test complete")
         self.display.add_text_line("Fan test complete")

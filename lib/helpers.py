@@ -24,6 +24,15 @@ class Status_LED:
             self.on()
             await uasyncio.sleep(sleep_duration)
             self.off()
+    
+    def flash_no_async(self, count: int, hz: float) -> None:
+        self.off()
+        sleep_duration = (1 / hz) / 2
+        for unused in range(count):
+            sleep(sleep_duration)
+            self.on()
+            sleep(sleep_duration)
+            self.off()
 
 def decimal_to_percent_str(decimal) -> str:
     value = decimal * 100

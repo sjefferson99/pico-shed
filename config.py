@@ -31,7 +31,8 @@ auto_page_scroll_pause = 0
 backlight_timeout_s = 5
 
 ## Battery monitor
-battery_adc_pin = 26
+# Set a valid ADC GP pin (26-28)
+battery_adc_pin = 28
 # Voltage divider resistor values in ohms - see documentation for diagram
 r1 = 21600
 r2 = 5040

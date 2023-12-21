@@ -1,9 +1,10 @@
 from picographics import PicoGraphics, DISPLAY_PICO_DISPLAY, PEN_RGB332
 from pimoroni import RGBLED
-from ulogging import uLogger
+from lib.ulogging import uLogger
 import config
 from time import sleep
 from utime import ticks_ms
+import uasyncio
 
 class Display:
     def __init__(self, log_level: int) -> None:
@@ -14,6 +15,11 @@ class Display:
             self.init_display()
         else:
             self.logger.info("Display disabled in config")
+    
+        self.BUTTON_A = 12
+        self.BUTTON_B = 13
+        self.BUTTON_X = 14
+        self.BUTTON_Y = 15
 
     def init_display(self) -> None:
         self.display = PicoGraphics(display=DISPLAY_PICO_DISPLAY, pen_type=PEN_RGB332, rotate=0)
@@ -34,7 +40,7 @@ class Display:
         self.current_y = 0
         self.header_font_scale = 3
         self.normal_font_scale = 2
-        self.display_data = {"indoor_humidity": "Unknown", "outdoor_humidity": "Unknown", "fan_speed": "Unknown", "wifi_status": "Unknown"}
+        self.display_data = {"indoor_humidity": "Unknown", "outdoor_humidity": "Unknown", "fan_speed": "Unknown", "wifi_status": "Unknown", "battery_voltage": "Unknown"}
         self.startup_display()
     
     def startup_display(self) -> None:
@@ -54,12 +60,19 @@ class Display:
         self.display.set_backlight(0)
         self.backlight_on_time_ms = 0
     
-    def check_backlight(self) -> None:
-        if self.backlight_on_time_ms > 0 and (self.backlight_on_time_ms + (config.backlight_timeout_s * 1000)) < ticks_ms():
-            self.backlight_off()
+    def should_backlight_be_switched_off(self) -> bool:
+        if self.backlight_on_time_ms > 0 and (self.backlight_on_time_ms + (config.backlight_timeout_s * 1000)) < ticks_ms() and self.mode != "startup":
+            return True
+        else:
+            return False
+    
+    async def manage_backlight_timeout(self) -> None:
+        while True:
+            if self.should_backlight_be_switched_off():
+                self.backlight_off()
+            await uasyncio.sleep(0.1)
 
     def update_display(self) -> None:
-        self.backlight_on()
         self.display.update()
 
     def clear_screen(self) -> None:
@@ -125,5 +138,6 @@ class Display:
                 self.add_text_line(f"OH: {self.display_data['outdoor_humidity']}")
                 self.add_text_line(f"Fan: {self.display_data['fan_speed']}")
                 self.add_text_line(f"Net: {self.display_data['wifi_status']}")
+                self.add_text_line(f"Batt: {self.display_data['battery_voltage']}")
         else:
             self.logger.info(f"Display update not shown as display disabled: {display_data}")

@@ -1,7 +1,7 @@
 from time import sleep
 from machine import Pin
 import uasyncio
-from ulogging import uLogger
+from lib.ulogging import uLogger
 
 class Status_LED:
     def __init__(self, log_level: int) -> None:

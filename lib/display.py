@@ -1,6 +1,6 @@
 from picographics import PicoGraphics, DISPLAY_PICO_DISPLAY, PEN_RGB332
 from pimoroni import RGBLED
-from ulogging import uLogger
+from lib.ulogging import uLogger
 import config
 from time import sleep
 from utime import ticks_ms

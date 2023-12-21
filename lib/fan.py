@@ -1,11 +1,11 @@
 from machine import Pin, PWM
 import config
-from networking import Wireless_Network
+from lib.networking import Wireless_Network
 from lib.helpers import Status_LED, decimal_to_percent_str
-from open_meteo import Weather_API
-from bme_280 import BME_280
-from ulogging import uLogger
-from display import Display
+from lib.open_meteo import Weather_API
+from lib.bme_280 import BME_280
+from lib.ulogging import uLogger
+from lib.display import Display
 import uasyncio
 
 class Fan:

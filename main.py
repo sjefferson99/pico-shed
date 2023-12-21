@@ -1,4 +1,4 @@
-from environment import Environment
+from lib.environment import Environment
 
 env = Environment(log_level=2)
 

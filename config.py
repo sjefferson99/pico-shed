@@ -28,7 +28,7 @@ enable_PWM_fan_speed = False
 display_enabled = True
 # Seconds to pause each auto scrolling information page (startup) for troubleshooting
 auto_page_scroll_pause = 0
-backlight_timeout_s = 5
+backlight_timeout_s = 30
 
 ## Battery monitor
 # Set a valid ADC GP pin (26-28)

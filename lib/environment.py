@@ -13,6 +13,7 @@ class Environment:
         self.logger = uLogger("Environment", log_level)
         self.display = Display(self.log_level)
         self.fan = Fan(self.log_level, self.display)
+        self.fan.fan_test()
         sleep(config.auto_page_scroll_pause)
         self.display.mode = "main"
         self.display.update_main_display()
@@ -30,8 +31,6 @@ class Environment:
         self.buttons = [self.button_a, self.button_b, self.button_x, self.button_y]
 
     def main_loop(self) -> None:
-        uasyncio.run_until_complete(self.fan.fan_test())
-
         loop = uasyncio.get_event_loop()
         
         uasyncio.create_task(self.display.manage_backlight_timeout())

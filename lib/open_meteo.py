@@ -7,8 +7,8 @@ from json import loads
 from time import localtime
 import urequests
 import config
-from ulogging import uLogger
-from display import Display
+from lib.ulogging import uLogger
+from lib.display import Display
 import gc
 
 class Weather_API:

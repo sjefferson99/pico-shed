@@ -1,6 +1,6 @@
-from fan import Fan
-from display import Display
-from ulogging import uLogger
+from lib.fan import Fan
+from lib.display import Display
+from lib.ulogging import uLogger
 from time import sleep
 import config
 import uasyncio

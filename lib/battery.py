@@ -1,6 +1,6 @@
 from machine import ADC
 import config
-from ulogging import uLogger
+from lib.ulogging import uLogger
 import uasyncio
 from time import time
 

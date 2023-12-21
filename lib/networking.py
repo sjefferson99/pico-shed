@@ -4,9 +4,9 @@ import rp2
 import network
 from ubinascii import hexlify
 import config
-from ulogging import uLogger
+from lib.ulogging import uLogger
 from lib.helpers import Status_LED
-from display import Display
+from lib.display import Display
 import uasyncio
 
 class Wireless_Network:

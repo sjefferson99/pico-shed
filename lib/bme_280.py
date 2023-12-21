@@ -4,8 +4,8 @@
 from breakout_bme280 import BreakoutBME280
 from pimoroni_i2c import PimoroniI2C
 import config
-from ulogging import uLogger
-from display import Display
+from lib.ulogging import uLogger
+from lib.display import Display
 
 class BME_280:
     

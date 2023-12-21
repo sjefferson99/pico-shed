@@ -1,7 +1,7 @@
 from machine import Pin
 import uasyncio
-from ulogging import uLogger
-from display import Display
+from lib.ulogging import uLogger
+from lib.display import Display
 
 class Button:
 

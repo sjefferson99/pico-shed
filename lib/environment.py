@@ -31,8 +31,10 @@ class Environment:
         self.buttons = [self.button_a, self.button_b, self.button_x, self.button_y]
 
     def main_loop(self) -> None:
-        loop = uasyncio.get_event_loop()
+        uasyncio.run(self.fan.wlan.load_uaiohttpclient())
         
+        loop = uasyncio.get_event_loop()
+               
         uasyncio.create_task(self.display.manage_backlight_timeout())
         
         if len(self.buttons) > 0:

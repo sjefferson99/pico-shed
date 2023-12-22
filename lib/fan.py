@@ -97,27 +97,3 @@ class Fan:
         while True:
             uasyncio.create_task(self.assess_fan_state())
             await uasyncio.sleep(config.weather_poll_frequency_in_seconds)
-
-    # async def network_retry_backoff(self) -> None:
-    #     self.logger.info(f"Backing off retry for {config.wifi_retry_backoff_seconds} seconds")
-    #     await self.status_led.flash((config.wifi_retry_backoff_seconds * self.led_retry_backoff_frequency), self.led_retry_backoff_frequency)
-
-    # async def check_network_access (self) -> bool:
-    #     self.logger.info("Checking for network access")
-    #     retries = 0
-    #     while self.wlan.get_status() != 3 and retries <= config.wifi_connect_retries:
-    #         try:
-    #             await self.wlan.connect_wifi()
-    #             return True
-    #         except Exception:
-    #             self.logger.warn(f"Error connecting to wifi on attempt {retries + 1} of {config.wifi_connect_retries + 1}")
-    #             retries += 1
-    #             await self.network_retry_backoff()
-
-    #     if self.wlan.get_status() == 3:
-    #         self.logger.info("Connected to wireless network")
-    #         return True
-    #     else:
-    #         self.logger.warn("Unable to connect to wireless network")
-    #         self.switch_on()
-    #         return False

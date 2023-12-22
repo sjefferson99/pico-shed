@@ -20,6 +20,7 @@ class Wireless_Network:
         self.wifi_country = config.wifi_country
         rp2.country(self.wifi_country)
         self.disable_power_management = 0xa11140
+        self.led_retry_backoff_frequency = 4
         
         # Reference: https://datasheets.raspberrypi.com/picow/connecting-to-the-internet-with-pico-w.pdf
         self.CYW43_LINK_DOWN = 0
@@ -117,3 +118,26 @@ class Wireless_Network:
 
     def get_status(self) -> int:
         return self.wlan.status()
+    
+    async def network_retry_backoff(self) -> None:
+        self.logger.info(f"Backing off retry for {config.wifi_retry_backoff_seconds} seconds")
+        await self.status_led.flash((config.wifi_retry_backoff_seconds * self.led_retry_backoff_frequency), self.led_retry_backoff_frequency)
+
+    async def check_network_access(self) -> bool:
+        self.logger.info("Checking for network access")
+        retries = 0
+        while self.get_status() != 3 and retries <= config.wifi_connect_retries:
+            try:
+                await self.connect_wifi()
+                return True
+            except Exception:
+                self.logger.warn(f"Error connecting to wifi on attempt {retries + 1} of {config.wifi_connect_retries + 1}")
+                retries += 1
+                await self.network_retry_backoff()
+
+        if self.get_status() == 3:
+            self.logger.info("Connected to wireless network")
+            return True
+        else:
+            self.logger.warn("Unable to connect to wireless network")
+            return False

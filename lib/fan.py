@@ -20,7 +20,6 @@ class Fan:
         self.wlan = Wireless_Network(log_level, self.display)
         self.weather = Weather_API(log_level, self.display)
         self.sensor = BME_280(log_level, self.display)
-        self.led_retry_backoff_frequency = 4
         self.humidity_hysteresis_pc = config.humidity_hysteresis_pc
     
     def pwm_fan_test(self) -> None:
@@ -84,38 +83,41 @@ class Fan:
     async def assess_fan_state(self) -> None:
         self.logger.info("Assessing fan state")
         await self.status_led.flash(4, 4)
-        network_access = await self.check_network_access()
+        network_access = await self.wlan.check_network_access()
+        
         if network_access == True:
             self.weather_data = self.weather.get_weather()
             self.readings = self.sensor.get_readings()
             self.display.update_main_display({"indoor_humidity": self.readings["humidity"], "outdoor_humidity": self.weather_data["humidity"]})
             await self.set_fan_from_humidity(self.readings["humidity"], self.weather_data["humidity"])
+        else:
+            self.switch_on()
         
     async def start_fan_management(self) -> None:
         while True:
             uasyncio.create_task(self.assess_fan_state())
             await uasyncio.sleep(config.weather_poll_frequency_in_seconds)
 
-    async def network_retry_backoff(self) -> None:
-        self.logger.info(f"Backing off retry for {config.wifi_retry_backoff_seconds} seconds")
-        await self.status_led.flash((config.wifi_retry_backoff_seconds * self.led_retry_backoff_frequency), self.led_retry_backoff_frequency)
+    # async def network_retry_backoff(self) -> None:
+    #     self.logger.info(f"Backing off retry for {config.wifi_retry_backoff_seconds} seconds")
+    #     await self.status_led.flash((config.wifi_retry_backoff_seconds * self.led_retry_backoff_frequency), self.led_retry_backoff_frequency)
 
-    async def check_network_access (self) -> bool:
-        self.logger.info("Checking for network access")
-        retries = 0
-        while self.wlan.get_status() != 3 and retries <= config.wifi_connect_retries:
-            try:
-                await self.wlan.connect_wifi()
-                return True
-            except Exception:
-                self.logger.warn(f"Error connecting to wifi on attempt {retries + 1} of {config.wifi_connect_retries + 1}")
-                retries += 1
-                await self.network_retry_backoff()
+    # async def check_network_access (self) -> bool:
+    #     self.logger.info("Checking for network access")
+    #     retries = 0
+    #     while self.wlan.get_status() != 3 and retries <= config.wifi_connect_retries:
+    #         try:
+    #             await self.wlan.connect_wifi()
+    #             return True
+    #         except Exception:
+    #             self.logger.warn(f"Error connecting to wifi on attempt {retries + 1} of {config.wifi_connect_retries + 1}")
+    #             retries += 1
+    #             await self.network_retry_backoff()
 
-        if self.wlan.get_status() == 3:
-            self.logger.info("Connected to wireless network")
-            return True
-        else:
-            self.logger.warn("Unable to connect to wireless network")
-            self.switch_on()
-            return False
+    #     if self.wlan.get_status() == 3:
+    #         self.logger.info("Connected to wireless network")
+    #         return True
+    #     else:
+    #         self.logger.warn("Unable to connect to wireless network")
+    #         self.switch_on()
+    #         return False

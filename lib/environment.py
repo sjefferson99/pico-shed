@@ -6,13 +6,15 @@ import config
 import uasyncio
 from lib.button import Button
 from lib.battery import Battery_Monitor
+from lib.networking import Wireless_Network
 
 class Environment:
     def __init__(self, log_level: int) -> None:
         self.log_level = log_level
         self.logger = uLogger("Environment", log_level)
         self.display = Display(self.log_level)
-        self.fan = Fan(self.log_level, self.display)
+        self.wlan = Wireless_Network(log_level, self.display)
+        self.fan = Fan(self.log_level, self.display, self.wlan)
         self.fan.fan_test()
         sleep(config.auto_page_scroll_pause)
         self.display.mode = "main"
@@ -31,7 +33,7 @@ class Environment:
         self.buttons = [self.button_a, self.button_b, self.button_x, self.button_y]
 
     def main_loop(self) -> None:
-        uasyncio.run(self.fan.wlan.load_uaiohttpclient())
+        uasyncio.run(self.wlan.load_uaiohttpclient())
         
         loop = uasyncio.get_event_loop()
                

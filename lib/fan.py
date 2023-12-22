@@ -9,7 +9,7 @@ from lib.display import Display
 import uasyncio
 
 class Fan:
-    def __init__(self, log_level: int, display: Display) -> None:
+    def __init__(self, log_level: int, display: Display, wlan: Wireless_Network) -> None:
         self.logger = uLogger("Fan", log_level)
         self.status_led = Status_LED(log_level)
         self.display = display
@@ -17,7 +17,7 @@ class Fan:
         self.fan_pwm_pin = PWM(Pin(config.fan_gpio_pin, Pin.OUT))
         self.fan_pwm_pin.freq(1000)
         self.switch_off()
-        self.wlan = Wireless_Network(log_level, self.display)
+        self.wlan = wlan
         self.weather = Weather_API(log_level, self.display)
         self.sensor = BME_280(log_level, self.display)
         self.humidity_hysteresis_pc = config.humidity_hysteresis_pc

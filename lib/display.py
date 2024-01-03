@@ -67,6 +67,7 @@ class Display:
             return False
     
     async def manage_backlight_timeout(self) -> None:
+        self.logger.info("Starting backlight timeout management")
         while True:
             if self.should_backlight_be_switched_off():
                 self.backlight_off()

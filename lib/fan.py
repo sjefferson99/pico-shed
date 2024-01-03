@@ -80,6 +80,17 @@ class Fan:
             await self.status_led.flash(2, 1)
             self.switch_off()
 
+    def parse_humidity_data(self) -> bool:
+        data_ok = True
+        if "humidity" not in self.weather_data:
+            self.weather_data["humidity"] = "Data missing"
+            data_ok = False
+        if "humidity" not in self.readings:
+            self.readings["humidity"] = "Data missing"
+            data_ok = False
+        
+        return data_ok
+    
     async def assess_fan_state(self) -> None:
         self.logger.info("Assessing fan state")
         await self.status_led.flash(4, 4)
@@ -88,9 +99,15 @@ class Fan:
         if network_access == True:
             self.weather_data = await self.weather.get_weather_async()
             self.readings = self.sensor.get_readings()
+            data_ok = self.parse_humidity_data()
             self.display.update_main_display({"indoor_humidity": self.readings["humidity"], "outdoor_humidity": self.weather_data["humidity"]})
-            await self.set_fan_from_humidity(self.readings["humidity"], self.weather_data["humidity"])
+            if data_ok:
+                await self.set_fan_from_humidity(self.readings["humidity"], self.weather_data["humidity"])
+            else:
+                self.logger.error("Humidity data not available - setting fan to 100%")
+                self.switch_on()
         else:
+            self.logger.error("No network access - setting fan to 100%")
             self.switch_on()
         
     async def start_fan_management(self) -> None:

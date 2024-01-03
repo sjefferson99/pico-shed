@@ -72,11 +72,10 @@ class Weather_API:
         response = await request.read()
         self.logger.info(f"response data: {response}")
         
-        if True:
-        #if response.status_code == 200:
+        if request.status == 200:
             weather = self.process_weather(loads(response), offset_hours)
         else:
-            self.logger.error("Failure to get weather data.\nStatus code: {}\nResponse text: {}".format(response.status_code, response.text))
+            self.logger.error("Failure to get weather data.\nStatus code: {}\nResponse text: {}".format(request.status, response))
 
         gc.collect()
 

@@ -7,7 +7,7 @@ import uasyncio
 from lib.button import Button
 from lib.battery import Battery_Monitor
 from lib.networking import Wireless_Network
-import website
+from http import website
 
 class Environment:
     def __init__(self, log_level: int) -> None:

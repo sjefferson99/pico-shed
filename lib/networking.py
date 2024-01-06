@@ -12,10 +12,9 @@ from sys import exit
 
 class Wireless_Network:
 
-    def __init__(self, log_level: int, display: Display) -> None:
+    def __init__(self, log_level: int) -> None:
         self.logger = uLogger("WIFI", log_level)
         self.status_led = Status_LED(log_level)
-        self.display = display
         self.wifi_ssid = config.wifi_ssid
         self.wifi_password = config.wifi_password
         self.wifi_country = config.wifi_country
@@ -44,13 +43,11 @@ class Wireless_Network:
         self.configure_wifi()
 
     def configure_wifi(self) -> None:
-        self.display.add_text_line("Configuring WiFi")
         self.wlan = network.WLAN(network.STA_IF)
         self.wlan.active(True)
         self.wlan.config(pm=self.disable_power_management)
-        mac = hexlify(self.wlan.config('mac'),':').decode()
-        self.logger.info("MAC: " + mac)
-        self.display.add_text_line(f"MAC: {mac}")
+        self.mac = hexlify(self.wlan.config('mac'),':').decode()
+        self.logger.info("MAC: " + self.mac)
     
     def dump_status(self):
         status = self.wlan.status()
@@ -88,11 +85,9 @@ class Wireless_Network:
 
     async def connection_error(self) -> None:
         await self.status_led.flash(2, 2)
-        self.display.update_main_display({"wifi_status": "Error"})
 
     async def connection_success(self) -> None:
         await self.status_led.flash(1, 2)
-        self.display.update_main_display({"wifi_status": "Connected"})
 
     async def attempt_ap_connect(self) -> None:
         self.logger.info(f"Connecting to SSID {self.wifi_ssid} (password: {self.wifi_password})...")

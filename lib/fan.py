@@ -113,8 +113,3 @@ class Fan:
         else:
             self.logger.error("No network access - setting fan to 100%")
             self.switch_on()
-        
-    async def start_fan_management(self) -> None:
-        while True:
-            uasyncio.create_task(self.assess_fan_state())
-            await uasyncio.sleep(config.weather_poll_frequency_in_seconds)

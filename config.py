@@ -38,3 +38,6 @@ r1 = 21600
 r2 = 5040
 # What value to add or subtract to correct a reported voltage
 voltage_correction = 0.12
+
+## Web interface
+web_port = 80

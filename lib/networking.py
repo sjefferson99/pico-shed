@@ -38,6 +38,10 @@ class Wireless_Network:
         self.CYW43_LINK_NONET: "No matching SSID found (could be out of range, or down)",
         self.CYW43_LINK_BADAUTH: "Authenticatation failure",
         }
+        self.ip = "Unknown"
+        self.subnet = "Unknown"
+        self.gateway = "Unknown"
+        self.dns = "Unknown"
 
         self.configure_wifi()
 
@@ -75,8 +79,8 @@ class Wireless_Network:
         self.logger.info("Ready for connection!")
     
     def generate_connection_info(self, elapsed_ms) -> None:
-        ip, subnet, gateway, dns = self.wlan.ifconfig()
-        self.logger.info(f"IP: {ip}, Subnet: {subnet}, Gateway: {gateway}, DNS: {dns}")
+        self.ip, self.subnet, self.gateway, self.dns = self.wlan.ifconfig()
+        self.logger.info(f"IP: {self.ip}, Subnet: {self.subnet}, Gateway: {self.gateway}, DNS: {self.dns}")
         
         self.logger.info(f"Elapsed: {elapsed_ms}ms")
         if elapsed_ms > 5000:

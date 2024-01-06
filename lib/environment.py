@@ -40,7 +40,8 @@ class Environment:
         
         loop = uasyncio.get_event_loop()
 
-        website.run()
+        website.run() #misleading for now, this actually just adds task to loop
+        uasyncio.create_task(self.website_status_monitor())
         uasyncio.create_task(self.network_status_monitor())
         
         if config.display_enabled:
@@ -53,6 +54,7 @@ class Environment:
         self.enable_battery_monitor()
         
         uasyncio.create_task(self.start_fan_management())
+        
         loop.run_forever()
 
     def enable_button_watchers(self) -> None:
@@ -84,4 +86,12 @@ class Environment:
                 self.display.update_main_display({"wifi_status": "Connecting"})
             else:
                 self.display.update_main_display({"wifi_status": "Error"})
+            await uasyncio.sleep(5)
+
+    async def website_status_monitor(self) -> None:
+        while True:
+            if self.wlan.dump_status() == 3:
+                self.display.update_main_display({"web_server": str(self.wlan.ip) + ":" + str(config.web_port)})
+            else:
+                self.display.update_main_display({"web_server": "Stopped"})
             await uasyncio.sleep(5)

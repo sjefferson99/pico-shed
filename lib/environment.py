@@ -7,6 +7,7 @@ import uasyncio
 from lib.button import Button
 from lib.battery import Battery_Monitor
 from lib.networking import Wireless_Network
+import website
 
 class Environment:
     def __init__(self, log_level: int) -> None:
@@ -36,6 +37,8 @@ class Environment:
         uasyncio.run(self.wlan.load_uaiohttpclient())
         
         loop = uasyncio.get_event_loop()
+
+        website.run()
                
         uasyncio.create_task(self.display.manage_backlight_timeout())
         

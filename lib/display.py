@@ -23,7 +23,7 @@ class Display:
 
     def init_display(self) -> None:
         self.display = PicoGraphics(display=DISPLAY_PICO_DISPLAY, pen_type=PEN_RGB332, rotate=0)
-        self.auto_page_scroll_pause = config.auto_page_scroll_pause
+        self.auto_page_scroll_pause = config.auto_page_scroll_pause_s
         self.GREEN = self.display.create_pen(0, 255, 0)
         self.BACKGROUND = self.display.create_pen(51, 153, 102)
         self.WHITE = self.display.create_pen(255, 255, 255)

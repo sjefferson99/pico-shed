@@ -21,7 +21,9 @@ class Fan:
         self.display.add_text_line("Init weather API")
         self.weather = Weather_API(log_level)
         self.display.add_text_line(f"LatLong: {self.weather.latlong}")
-        self.sensor = BME_280(log_level, self.display)
+        self.display.add_text_line("Init BME280")
+        self.sensor = BME_280(log_level)
+        self.display.add_text_line(f"I2c Pins: scl: {config.i2c_pins['scl']} sda: {config.i2c_pins['sda']}")
         self.humidity_hysteresis_pc = config.humidity_hysteresis_pc
     
     def pwm_fan_test(self) -> None:

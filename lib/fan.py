@@ -6,7 +6,6 @@ from lib.open_meteo import Weather_API
 from lib.bme_280 import BME_280
 from lib.ulogging import uLogger
 from lib.display import Display
-import uasyncio
 
 class Fan:
     def __init__(self, log_level: int, display: Display, wlan: Wireless_Network) -> None:

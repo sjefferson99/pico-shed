@@ -8,7 +8,6 @@ from time import localtime
 import urequests
 import config
 from lib.ulogging import uLogger
-from lib.display import Display
 import gc
 
 class Weather_API:

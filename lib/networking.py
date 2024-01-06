@@ -6,7 +6,6 @@ from ubinascii import hexlify
 import config
 from lib.ulogging import uLogger
 from lib.helpers import Status_LED
-from lib.display import Display
 import uasyncio
 from sys import exit
 

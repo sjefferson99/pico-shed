@@ -42,7 +42,9 @@ class Environment:
 
         website.run()
         uasyncio.create_task(self.network_status_monitor())
-        uasyncio.create_task(self.display.manage_backlight_timeout())
+        
+        if config.display_enabled:
+            uasyncio.create_task(self.display.manage_backlight_timeout())
         
         if len(self.buttons) > 0:
             self.enable_button_watchers()

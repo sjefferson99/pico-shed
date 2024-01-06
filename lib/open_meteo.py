@@ -15,12 +15,9 @@ class Weather_API:
     """
     Class for interacting with the Open_Meteo API
     """
-    def __init__(self, log_level: int, display: Display) -> None:
+    def __init__(self, log_level: int) -> None:
         self.logger = uLogger("Open-Meteo", log_level)
-        self.display = display
         self.latlong = config.lat_long
-        self.display.add_text_line("Init weather API")
-        self.display.add_text_line(f"LatLong: {self.latlong}")
         self.baseurl = "http://api.open-meteo.com/v1/forecast?latitude={}&longitude={}".format(self.latlong[0], self.latlong[1])
         self.parameters = "&hourly=temperature_2m,dewpoint_2m,relative_humidity_2m,weathercode,pressure_msl,windspeed_10m,winddirection_10m,windgusts_10m&current_weather=true&past_days=1&forecast_days=1&windspeed_unit=kn&timezone=GB&timeformat=unixtime"
         self.url = self.baseurl + self.parameters

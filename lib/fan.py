@@ -18,7 +18,9 @@ class Fan:
         self.fan_pwm_pin.freq(1000)
         self.switch_off()
         self.wlan = wlan
-        self.weather = Weather_API(log_level, self.display)
+        self.display.add_text_line("Init weather API")
+        self.weather = Weather_API(log_level)
+        self.display.add_text_line(f"LatLong: {self.weather.latlong}")
         self.sensor = BME_280(log_level, self.display)
         self.humidity_hysteresis_pc = config.humidity_hysteresis_pc
     

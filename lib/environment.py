@@ -7,7 +7,7 @@ import uasyncio
 from lib.button import Button
 from lib.battery import Battery_Monitor
 from lib.networking import Wireless_Network
-from http import website
+from http.website import Web_App
 
 class Environment:
     def __init__(self, log_level: int) -> None:
@@ -27,6 +27,7 @@ class Environment:
         if self.display.enabled:
             self.init_pico_display_buttons()
         self.battery = Battery_Monitor(log_level)
+        self.web_app = Web_App()
 
     def init_pico_display_buttons(self) -> None:    
         self.button_a = Button(self.log_level, self.display.BUTTON_A, self.display)
@@ -40,7 +41,7 @@ class Environment:
         
         loop = uasyncio.get_event_loop()
 
-        website.load_into_loop()
+        self.web_app.load_into_loop()
         uasyncio.create_task(self.website_status_monitor())
         uasyncio.create_task(self.network_status_monitor())
         
@@ -91,7 +92,7 @@ class Environment:
 
     async def website_status_monitor(self) -> None:
         while True:
-            if self.wlan.dump_status() == 3 and self.loop_running:
+            if self.wlan.dump_status() == 3 and self.web_app.running:
                 self.display.update_main_display({"web_server": str(self.wlan.ip) + ":" + str(config.web_port)})
             else:
                 self.display.update_main_display({"web_server": "Stopped"})

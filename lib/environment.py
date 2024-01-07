@@ -18,7 +18,8 @@ class Environment:
         self.wlan = Wireless_Network(log_level)
         self.display.add_text_line(f"MAC: {self.wlan.mac}")
         self.fan = Fan(self.log_level, self.display, self.wlan)
-        self.fan.fan_test()
+        if config.enable_startup_fan_test:
+            self.fan.fan_test()
         sleep(config.auto_page_scroll_pause_s)
         self.display.mode = "main"
         self.display.update_main_display()

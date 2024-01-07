@@ -23,6 +23,7 @@ fan_gpio_pin = 2
 humidity_hysteresis_pc = 1
 # Use PWM to gradually increase fan speed or simply turn fan on and off
 enable_PWM_fan_speed = False
+enable_startup_fan_test = True
 
 ## Display Supports Pico Display and Pico Display 2 (with extra space as unused border)
 display_enabled = True

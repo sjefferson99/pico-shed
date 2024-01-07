@@ -24,6 +24,8 @@ class Fan:
         self.sensor = BME_280(log_level)
         self.display.add_text_line(f"I2c Pins: scl: {config.i2c_pins['scl']} sda: {config.i2c_pins['sda']}")
         self.humidity_hysteresis_pc = config.humidity_hysteresis_pc
+        self.readings = {}
+        self.weather_data = {}
     
     def pwm_fan_test(self) -> None:
         self.set_speed(0.1)
@@ -112,3 +114,9 @@ class Fan:
         else:
             self.logger.error("No network access - setting fan to 100%")
             self.switch_on()
+    
+    def get_latest_indoor_humidity(self) -> float:
+        if "humidity" in self.readings:
+            return self.readings["humidity"]
+        else:
+            return -1

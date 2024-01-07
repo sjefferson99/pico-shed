@@ -1,10 +1,12 @@
 from http.webserver import webserver
 import config
+from lib.fan import Fan
 
 class Web_App:
 
-    def __init__(self) -> None:
+    def __init__(self, fan_module: Fan) -> None:
         self.app = webserver()
+        self.fan = fan_module
         self.running = False
         self.create_homepage()
         
@@ -16,5 +18,18 @@ class Web_App:
         @self.app.route('/')
         async def index(request, response):
             await response.start_html()
-            await response.send('<html><body><h1>Hello, world!</h1></html>\n')
+            ih = self.fan.get_latest_indoor_humidity()
+            html = """
+            <html>
+                <body>
+                    <h1>Pico environment control</h1>
+                    <h2>Live values</h2>
+                    <ul>
+                        <li>Indoor humidity: {indoor_humidity}%</li>
+                    </ul>
+                </body>
+            </html>
+            
+            """.format(indoor_humidity = ih)
+            await response.send(html)
 

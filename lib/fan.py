@@ -120,3 +120,14 @@ class Fan:
             return self.readings["humidity"]
         else:
             return -1
+
+    def get_latest_outdoor_humidity(self) -> float:
+        if "humidity" in self.weather_data:
+            return self.weather_data["humidity"]
+        else:
+            return -1
+    
+    def get_fan_speed(self) -> float:
+        duty = self.fan_pwm_pin.duty_u16()
+        speed = duty / self.max_pwm_duty
+        return speed

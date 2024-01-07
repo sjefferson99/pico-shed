@@ -28,7 +28,8 @@ class Environment:
         if self.display.enabled:
             self.init_pico_display_buttons()
         self.battery = Battery_Monitor(log_level)
-        self.web_app = Web_App(self.fan)
+        modules = {'fan_module': self.fan, 'battery_monitor': self.battery}
+        self.web_app = Web_App(modules)
 
     def init_pico_display_buttons(self) -> None:    
         self.button_a = Button(self.log_level, self.display.BUTTON_A, self.display)

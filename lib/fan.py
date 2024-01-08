@@ -6,10 +6,9 @@ from lib.open_meteo import Weather_API
 from lib.bme_280 import BME_280
 from lib.ulogging import uLogger
 from lib.display import Display
-import uasyncio
 
 class Fan:
-    def __init__(self, log_level: int, display: Display) -> None:
+    def __init__(self, log_level: int, display: Display, wlan: Wireless_Network) -> None:
         self.logger = uLogger("Fan", log_level)
         self.status_led = Status_LED(log_level)
         self.display = display
@@ -17,11 +16,16 @@ class Fan:
         self.fan_pwm_pin = PWM(Pin(config.fan_gpio_pin, Pin.OUT))
         self.fan_pwm_pin.freq(1000)
         self.switch_off()
-        self.wlan = Wireless_Network(log_level, self.display)
-        self.weather = Weather_API(log_level, self.display)
-        self.sensor = BME_280(log_level, self.display)
-        self.led_retry_backoff_frequency = 4
+        self.wlan = wlan
+        self.display.add_text_line("Init weather API")
+        self.weather = Weather_API(log_level)
+        self.display.add_text_line(f"LatLong: {self.weather.latlong}")
+        self.display.add_text_line("Init BME280")
+        self.sensor = BME_280(log_level)
+        self.display.add_text_line(f"I2c Pins: scl: {config.i2c_pins['scl']} sda: {config.i2c_pins['sda']}")
         self.humidity_hysteresis_pc = config.humidity_hysteresis_pc
+        self.readings = {}
+        self.weather_data = {}
     
     def pwm_fan_test(self) -> None:
         self.set_speed(0.1)
@@ -81,41 +85,49 @@ class Fan:
             await self.status_led.flash(2, 1)
             self.switch_off()
 
+    def parse_humidity_data(self) -> bool:
+        data_ok = True
+        if "humidity" not in self.weather_data:
+            self.weather_data["humidity"] = "Data missing"
+            data_ok = False
+        if "humidity" not in self.readings:
+            self.readings["humidity"] = "Data missing"
+            data_ok = False
+        
+        return data_ok
+    
     async def assess_fan_state(self) -> None:
         self.logger.info("Assessing fan state")
         await self.status_led.flash(4, 4)
-        network_access = await self.check_network_access()
-        if network_access == True:
-            self.weather_data = self.weather.get_weather()
-            self.readings = self.sensor.get_readings()
-            self.display.update_main_display({"indoor_humidity": self.readings["humidity"], "outdoor_humidity": self.weather_data["humidity"]})
-            await self.set_fan_from_humidity(self.readings["humidity"], self.weather_data["humidity"])
+        network_access = await self.wlan.check_network_access()
         
-    async def start_fan_management(self) -> None:
-        while True:
-            uasyncio.create_task(self.assess_fan_state())
-            await uasyncio.sleep(config.weather_poll_frequency_in_seconds)
-
-    async def network_retry_backoff(self) -> None:
-        self.logger.info(f"Backing off retry for {config.wifi_retry_backoff_seconds} seconds")
-        await self.status_led.flash((config.wifi_retry_backoff_seconds * self.led_retry_backoff_frequency), self.led_retry_backoff_frequency)
-
-    async def check_network_access (self) -> bool:
-        self.logger.info("Checking for network access")
-        retries = 0
-        while self.wlan.get_status() != 3 and retries <= config.wifi_connect_retries:
-            try:
-                await self.wlan.connect_wifi()
-                return True
-            except Exception:
-                self.logger.warn(f"Error connecting to wifi on attempt {retries + 1} of {config.wifi_connect_retries + 1}")
-                retries += 1
-                await self.network_retry_backoff()
-
-        if self.wlan.get_status() == 3:
-            self.logger.info("Connected to wireless network")
-            return True
+        if network_access == True:
+            self.weather_data = await self.weather.get_weather_async()
+            self.readings = self.sensor.get_readings()
+            data_ok = self.parse_humidity_data()
+            self.display.update_main_display({"indoor_humidity": self.readings["humidity"], "outdoor_humidity": self.weather_data["humidity"]})
+            if data_ok:
+                await self.set_fan_from_humidity(self.readings["humidity"], self.weather_data["humidity"])
+            else:
+                self.logger.error("Humidity data not available - setting fan to 100%")
+                self.switch_on()
         else:
-            self.logger.warn("Unable to connect to wireless network")
+            self.logger.error("No network access - setting fan to 100%")
             self.switch_on()
-            return False
+    
+    def get_latest_indoor_humidity(self) -> float:
+        if "humidity" in self.readings:
+            return self.readings["humidity"]
+        else:
+            return -1
+
+    def get_latest_outdoor_humidity(self) -> float:
+        if "humidity" in self.weather_data:
+            return self.weather_data["humidity"]
+        else:
+            return -1
+    
+    def get_fan_speed(self) -> float:
+        duty = self.fan_pwm_pin.duty_u16()
+        speed = duty / self.max_pwm_duty
+        return speed

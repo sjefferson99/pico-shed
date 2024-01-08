@@ -8,20 +8,16 @@ from time import localtime
 import urequests
 import config
 from lib.ulogging import uLogger
-from lib.display import Display
 import gc
 
 class Weather_API:
     """
     Class for interacting with the Open_Meteo API
     """
-    def __init__(self, log_level: int, display: Display) -> None:
+    def __init__(self, log_level: int) -> None:
         self.logger = uLogger("Open-Meteo", log_level)
-        self.display = display
         self.latlong = config.lat_long
-        self.display.add_text_line("Init weather API")
-        self.display.add_text_line(f"LatLong: {self.latlong}")
-        self.baseurl = "https://api.open-meteo.com/v1/forecast?latitude={}&longitude={}".format(self.latlong[0], self.latlong[1])
+        self.baseurl = "http://api.open-meteo.com/v1/forecast?latitude={}&longitude={}".format(self.latlong[0], self.latlong[1])
         self.parameters = "&hourly=temperature_2m,dewpoint_2m,relative_humidity_2m,weathercode,pressure_msl,windspeed_10m,winddirection_10m,windgusts_10m&current_weather=true&past_days=1&forecast_days=1&windspeed_unit=kn&timezone=GB&timeformat=unixtime"
         self.url = self.baseurl + self.parameters
         
@@ -57,6 +53,30 @@ class Weather_API:
 
         return weather
 
+    async def get_weather_async(self, offset_hours: int = 0) -> dict:  # TODO make new async function that can correctly parse the aiohttp request object
+        """
+        Asynchronously get weather information for a configured location as of now and offset_hours in the past to a maximum of 24
+        Returns a dictionary of weather information with human readable key names - Nautical metric units.
+        """
+        import uaiohttpclient
+
+        gc.collect()
+        weather = {}
+        self.logger.info(self.url)
+        request = await uaiohttpclient.request("GET", self.url)
+        self.logger.info(f"request: {request}")
+        response = await request.read()
+        self.logger.info(f"response data: {response}")
+        
+        if request.status == 200:
+            weather = self.process_weather(loads(response), offset_hours)
+        else:
+            self.logger.error("Failure to get weather data.\nStatus code: {}\nResponse text: {}".format(request.status, response))
+
+        gc.collect()
+
+        return weather
+    
     def lookup_weather_code(self, code) -> str:
         for weather, codes in self.weather_code_map.items():
             if code in codes:

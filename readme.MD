@@ -7,6 +7,7 @@ First version is simply to control the induction fan on my shed to only run when
 The fan pin should be run through a transistor and not directly connected for current/dynamic loading reasons. A transistor is required instead of a relay to support the PWM speed control.
 
 - Open-meteo API lookup for local area weather conditions
+- All code is compatible with AsyncIO
 - BME280 local environment sensing (temperature, humidity, pressure)
 - GPIO on/off control based on comparisons of local area vs environment conditions
 - Debug logging capability - inherited from top fan class
@@ -25,10 +26,12 @@ The fan pin should be run through a transistor and not directly connected for cu
   - Fan speed
   - Network status
   - Configurable backlight timeout
-- With the exception of the requests for weather API (currently stumped on micropython support for aiohttp or threaded asyncio), code is compatible with AsyncIO
 - Async button class provides ability to detect button presses and map to function execution 
-- If the backlight is off, only enable backlight on first press of a button
+- If the backlight is off, only enable backlight on first press of a button and don't execute button function
 - Battery voltage monitoring to display
+- Simple web UI to show status of humidity, fan speed and battery voltage
+- Website status, and when active, IP and port shown on display
+- Simple API to return the above raw values, navigate to /api
 
 ### Installation
 ###  Firmware

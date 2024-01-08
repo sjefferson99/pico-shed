@@ -6,20 +6,20 @@ from ubinascii import hexlify
 import config
 from lib.ulogging import uLogger
 from lib.helpers import Status_LED
-from lib.display import Display
 import uasyncio
+from sys import exit
 
 class Wireless_Network:
 
-    def __init__(self, log_level: int, display: Display) -> None:
+    def __init__(self, log_level: int) -> None:
         self.logger = uLogger("WIFI", log_level)
         self.status_led = Status_LED(log_level)
-        self.display = display
         self.wifi_ssid = config.wifi_ssid
         self.wifi_password = config.wifi_password
         self.wifi_country = config.wifi_country
         rp2.country(self.wifi_country)
         self.disable_power_management = 0xa11140
+        self.led_retry_backoff_frequency = 4
         
         # Reference: https://datasheets.raspberrypi.com/picow/connecting-to-the-internet-with-pico-w.pdf
         self.CYW43_LINK_DOWN = 0
@@ -38,17 +38,19 @@ class Wireless_Network:
         self.CYW43_LINK_NONET: "No matching SSID found (could be out of range, or down)",
         self.CYW43_LINK_BADAUTH: "Authenticatation failure",
         }
+        self.ip = "Unknown"
+        self.subnet = "Unknown"
+        self.gateway = "Unknown"
+        self.dns = "Unknown"
 
         self.configure_wifi()
 
     def configure_wifi(self) -> None:
-        self.display.add_text_line("Configuring WiFi")
         self.wlan = network.WLAN(network.STA_IF)
         self.wlan.active(True)
         self.wlan.config(pm=self.disable_power_management)
-        mac = hexlify(self.wlan.config('mac'),':').decode()
-        self.logger.info("MAC: " + mac)
-        self.display.add_text_line(f"MAC: {mac}")
+        self.mac = hexlify(self.wlan.config('mac'),':').decode()
+        self.logger.info("MAC: " + self.mac)
     
     def dump_status(self):
         status = self.wlan.status()
@@ -77,8 +79,8 @@ class Wireless_Network:
         self.logger.info("Ready for connection!")
     
     def generate_connection_info(self, elapsed_ms) -> None:
-        ip, subnet, gateway, dns = self.wlan.ifconfig()
-        self.logger.info(f"IP: {ip}, Subnet: {subnet}, Gateway: {gateway}, DNS: {dns}")
+        self.ip, self.subnet, self.gateway, self.dns = self.wlan.ifconfig()
+        self.logger.info(f"IP: {self.ip}, Subnet: {self.subnet}, Gateway: {self.gateway}, DNS: {self.dns}")
         
         self.logger.info(f"Elapsed: {elapsed_ms}ms")
         if elapsed_ms > 5000:
@@ -86,11 +88,9 @@ class Wireless_Network:
 
     async def connection_error(self) -> None:
         await self.status_led.flash(2, 2)
-        self.display.update_main_display({"wifi_status": "Error"})
 
     async def connection_success(self) -> None:
         await self.status_led.flash(1, 2)
-        self.display.update_main_display({"wifi_status": "Connected"})
 
     async def attempt_ap_connect(self) -> None:
         self.logger.info(f"Connecting to SSID {self.wifi_ssid} (password: {self.wifi_password})...")
@@ -117,3 +117,47 @@ class Wireless_Network:
 
     def get_status(self) -> int:
         return self.wlan.status()
+    
+    async def network_retry_backoff(self) -> None:
+        self.logger.info(f"Backing off retry for {config.wifi_retry_backoff_seconds} seconds")
+        await self.status_led.flash((config.wifi_retry_backoff_seconds * self.led_retry_backoff_frequency), self.led_retry_backoff_frequency)
+
+    async def check_network_access(self) -> bool:
+        self.logger.info("Checking for network access")
+        retries = 0
+        while self.get_status() != 3 and retries <= config.wifi_connect_retries:
+            try:
+                await self.connect_wifi()
+                return True
+            except Exception:
+                self.logger.warn(f"Error connecting to wifi on attempt {retries + 1} of {config.wifi_connect_retries + 1}")
+                retries += 1
+                await self.network_retry_backoff()
+
+        if self.get_status() == 3:
+            self.logger.info("Connected to wireless network")
+            return True
+        else:
+            self.logger.warn("Unable to connect to wireless network")
+            return False
+
+    async def load_uaiohttpclient(self) -> None:
+        try:
+            import uaiohttpclient
+            self.logger.info("uaiohttpclient module loaded successfully")
+        except:
+            self.logger.warn("uaiohttpclient module not installed, attempting install over wireless...")
+            import mip
+            net_access = await self.check_network_access()
+            if net_access:
+                try:
+                    mip.install("uaiohttpclient")
+                    self.logger.info("uaiohttpclient module installed successfully")
+                    import uaiohttpclient
+                    self.logger.info("uaiohttpclient module loaded successfully")
+                except:
+                    self.logger.critical("Unable to install uaiohttpclient module using mip, exiting as this is required for outdoor humidity lookup")
+                    exit()
+            else:
+                self.logger.critical("Unable to connect to wifi to install uaiohttpclient module, exiting as this is required for outdoor humidity lookup")
+                exit()

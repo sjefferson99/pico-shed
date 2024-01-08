@@ -5,15 +5,11 @@ from breakout_bme280 import BreakoutBME280
 from pimoroni_i2c import PimoroniI2C
 import config
 from lib.ulogging import uLogger
-from lib.display import Display
 
 class BME_280:
     
-    def __init__(self, log_level: int, display: Display) -> None:
+    def __init__(self, log_level: int) -> None:
         self.logger = uLogger("BME280", log_level)
-        self.display = display
-        self.display.add_text_line("Init BME280")
-        self.display.add_text_line(f"I2c Pins: scl: {config.i2c_pins['scl']} sda: {config.i2c_pins['sda']}")
         self.i2c = PimoroniI2C(**config.i2c_pins)
         self.bme = BreakoutBME280(self.i2c)
         self.get_readings() # Clear incorrect first value after startup

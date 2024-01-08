@@ -6,7 +6,6 @@ from lib.open_meteo import Weather_API
 from lib.bme_280 import BME_280
 from lib.ulogging import uLogger
 from lib.display import Display
-import uasyncio
 
 class Fan:
     def __init__(self, log_level: int, display: Display, wlan: Wireless_Network) -> None:
@@ -18,9 +17,15 @@ class Fan:
         self.fan_pwm_pin.freq(1000)
         self.switch_off()
         self.wlan = wlan
-        self.weather = Weather_API(log_level, self.display)
-        self.sensor = BME_280(log_level, self.display)
+        self.display.add_text_line("Init weather API")
+        self.weather = Weather_API(log_level)
+        self.display.add_text_line(f"LatLong: {self.weather.latlong}")
+        self.display.add_text_line("Init BME280")
+        self.sensor = BME_280(log_level)
+        self.display.add_text_line(f"I2c Pins: scl: {config.i2c_pins['scl']} sda: {config.i2c_pins['sda']}")
         self.humidity_hysteresis_pc = config.humidity_hysteresis_pc
+        self.readings = {}
+        self.weather_data = {}
     
     def pwm_fan_test(self) -> None:
         self.set_speed(0.1)
@@ -109,8 +114,20 @@ class Fan:
         else:
             self.logger.error("No network access - setting fan to 100%")
             self.switch_on()
-        
-    async def start_fan_management(self) -> None:
-        while True:
-            uasyncio.create_task(self.assess_fan_state())
-            await uasyncio.sleep(config.weather_poll_frequency_in_seconds)
+    
+    def get_latest_indoor_humidity(self) -> float:
+        if "humidity" in self.readings:
+            return self.readings["humidity"]
+        else:
+            return -1
+
+    def get_latest_outdoor_humidity(self) -> float:
+        if "humidity" in self.weather_data:
+            return self.weather_data["humidity"]
+        else:
+            return -1
+    
+    def get_fan_speed(self) -> float:
+        duty = self.fan_pwm_pin.duty_u16()
+        speed = duty / self.max_pwm_duty
+        return speed

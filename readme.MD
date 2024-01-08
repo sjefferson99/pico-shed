@@ -29,6 +29,9 @@ The fan pin should be run through a transistor and not directly connected for cu
 - Async button class provides ability to detect button presses and map to function execution 
 - If the backlight is off, only enable backlight on first press of a button and don't execute button function
 - Battery voltage monitoring to display
+- Simple web UI to show status of humidity, fan speed and battery voltage
+- Website status, and when active, IP and port shown on display
+- Simple API to return the above raw values, navigate to /api
 
 ### Installation
 ###  Firmware

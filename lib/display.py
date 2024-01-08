@@ -23,7 +23,7 @@ class Display:
 
     def init_display(self) -> None:
         self.display = PicoGraphics(display=DISPLAY_PICO_DISPLAY, pen_type=PEN_RGB332, rotate=0)
-        self.auto_page_scroll_pause = config.auto_page_scroll_pause
+        self.auto_page_scroll_pause = config.auto_page_scroll_pause_s
         self.GREEN = self.display.create_pen(0, 255, 0)
         self.BACKGROUND = self.display.create_pen(51, 153, 102)
         self.WHITE = self.display.create_pen(255, 255, 255)
@@ -40,7 +40,7 @@ class Display:
         self.current_y = 0
         self.header_font_scale = 3
         self.normal_font_scale = 2
-        self.display_data = {"indoor_humidity": "Unknown", "outdoor_humidity": "Unknown", "fan_speed": "Unknown", "wifi_status": "Unknown", "battery_voltage": "Unknown"}
+        self.display_data = {"indoor_humidity": "Unknown", "outdoor_humidity": "Unknown", "fan_speed": "Unknown", "wifi_status": "Unknown", "battery_voltage": "Unknown", "web_server": "Unknown"}
         self.startup_display()
     
     def startup_display(self) -> None:
@@ -140,5 +140,6 @@ class Display:
                 self.add_text_line(f"Fan: {self.display_data['fan_speed']}")
                 self.add_text_line(f"Net: {self.display_data['wifi_status']}")
                 self.add_text_line(f"Batt: {self.display_data['battery_voltage']}")
+                self.add_text_line(f"Web: {self.display_data['web_server']}")
         else:
             self.logger.info(f"Display update not shown as display disabled: {display_data}")

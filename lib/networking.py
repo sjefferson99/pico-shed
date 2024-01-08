@@ -6,16 +6,14 @@ from ubinascii import hexlify
 import config
 from lib.ulogging import uLogger
 from lib.helpers import Status_LED
-from lib.display import Display
 import uasyncio
 from sys import exit
 
 class Wireless_Network:
 
-    def __init__(self, log_level: int, display: Display) -> None:
+    def __init__(self, log_level: int) -> None:
         self.logger = uLogger("WIFI", log_level)
         self.status_led = Status_LED(log_level)
-        self.display = display
         self.wifi_ssid = config.wifi_ssid
         self.wifi_password = config.wifi_password
         self.wifi_country = config.wifi_country
@@ -40,17 +38,19 @@ class Wireless_Network:
         self.CYW43_LINK_NONET: "No matching SSID found (could be out of range, or down)",
         self.CYW43_LINK_BADAUTH: "Authenticatation failure",
         }
+        self.ip = "Unknown"
+        self.subnet = "Unknown"
+        self.gateway = "Unknown"
+        self.dns = "Unknown"
 
         self.configure_wifi()
 
     def configure_wifi(self) -> None:
-        self.display.add_text_line("Configuring WiFi")
         self.wlan = network.WLAN(network.STA_IF)
         self.wlan.active(True)
         self.wlan.config(pm=self.disable_power_management)
-        mac = hexlify(self.wlan.config('mac'),':').decode()
-        self.logger.info("MAC: " + mac)
-        self.display.add_text_line(f"MAC: {mac}")
+        self.mac = hexlify(self.wlan.config('mac'),':').decode()
+        self.logger.info("MAC: " + self.mac)
     
     def dump_status(self):
         status = self.wlan.status()
@@ -79,8 +79,8 @@ class Wireless_Network:
         self.logger.info("Ready for connection!")
     
     def generate_connection_info(self, elapsed_ms) -> None:
-        ip, subnet, gateway, dns = self.wlan.ifconfig()
-        self.logger.info(f"IP: {ip}, Subnet: {subnet}, Gateway: {gateway}, DNS: {dns}")
+        self.ip, self.subnet, self.gateway, self.dns = self.wlan.ifconfig()
+        self.logger.info(f"IP: {self.ip}, Subnet: {self.subnet}, Gateway: {self.gateway}, DNS: {self.dns}")
         
         self.logger.info(f"Elapsed: {elapsed_ms}ms")
         if elapsed_ms > 5000:
@@ -88,11 +88,9 @@ class Wireless_Network:
 
     async def connection_error(self) -> None:
         await self.status_led.flash(2, 2)
-        self.display.update_main_display({"wifi_status": "Error"})
 
     async def connection_success(self) -> None:
         await self.status_led.flash(1, 2)
-        self.display.update_main_display({"wifi_status": "Connected"})
 
     async def attempt_ap_connect(self) -> None:
         self.logger.info(f"Connecting to SSID {self.wifi_ssid} (password: {self.wifi_password})...")

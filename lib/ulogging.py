@@ -1,3 +1,5 @@
+import gc
+
 class uLogger:
     
     def __init__(self, module_name: str, debug_level: int) -> None:
@@ -12,16 +14,16 @@ class uLogger:
 
     def info(self, message) -> None:
         if self.debug_level > 3:
-            print(f"[Info][{self.module_name}]: {message}") 
+            print(f"[Mem: {round(gc.mem_free() / 1024)}kB free][Info][{self.module_name}]: {message}") 
 
     def warn(self, message) -> None:
         if self.debug_level > 2:
-            print(f"[Warning][{self.module_name}]: {message}")
+            print(f"[Mem: {round(gc.mem_free() / 1024)}kB free][Warning][{self.module_name}]: {message}")
 
     def error(self, message) -> None:
         if self.debug_level > 1:
-            print(f"[*Error*][{self.module_name}]: {message}")
+            print(f"[Mem: {round(gc.mem_free() / 1024)}kB free][*Error*][{self.module_name}]: {message}")
 
     def critical(self, message) -> None:
         if self.debug_level > 0:
-            print(f"[!Critical!][{self.module_name}]: {message}")
+            print(f"[Mem: {round(gc.mem_free() / 1024)}kB free][!Critical!][{self.module_name}]: {message}")

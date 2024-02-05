@@ -102,7 +102,7 @@ class Fan:
         network_access = await self.wlan.check_network_access()
         
         if network_access == True:
-            self.weather_data = await self.weather.get_weather_async()
+            self.weather_data = await self.weather.get_humidity_async()
             self.readings = self.sensor.get_readings()
             data_ok = self.parse_humidity_data()
             self.display.update_main_display({"indoor_humidity": self.readings["humidity"], "outdoor_humidity": self.weather_data["humidity"]})

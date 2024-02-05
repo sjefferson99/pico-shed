@@ -9,28 +9,27 @@ The fan pin should be run through a transistor and not directly connected for cu
 - Open-meteo API lookup for local area weather conditions
 - All code is compatible with AsyncIO
 - BME280 local environment sensing (temperature, humidity, pressure)
-- GPIO on/off control based on comparisons of local area vs environment conditions
-- Debug logging capability - inherited from top fan class
-- Configurable network retries
+- GPIO on/off/PWM fan control based on comparisons of local area vs environment humidity conditions
+- Debug logging capability - inherited from top fan class - shows free memory on each entry
 - Basic network status feedback via onboard LED
-- Fan fails to on state if no network
-- Ensures network for API calls with configurable retries 
-- Hysteresis on fan state change
+- Fan fails to 100% speed if no network to assess outdoor humidity
+- Ensures network connectivity for API calls with configurable retries 
+- Hysteresis on fan state change to prevent flapping of fan on/off for high polling speeds
 - PWM fan speed control based on humidity differential
-- Disable PWM option for relays or fans that don't suport it
-- Fan startup test with LED feedback
-- Pico display pack support (tested with [Pico Dsiplay Pack 240x135](https://shop.pimoroni.com/products/pico-display-pack?variant=32368664215635)) 
-  - Startup information 
+- Disable PWM option for relays or fans that don't support it
+- Configurable fan startup test with LED feedback
+- Pico display pack support (tested with [Pico Dsiplay Pack 240x135](https://shop.pimoroni.com/products/pico-display-pack?variant=32368664215635) and also [Pico Display pack 2 320x240](https://shop.pimoroni.com/products/pico-display-pack-2-0?variant=39374122582099) which currently has a noise border and same smaller usable area) 
+  - Startup information (Can configure screen pause delay to extract startup output such as MAC)
   - Indoor humidity
   - Outdoor humidity
   - Fan speed
   - Network status
+  - Battery voltage
+  - Web UI state and IP:port
   - Configurable backlight timeout
+  - If the backlight is off, only enable backlight on first press of a button and don't execute button function
 - Async button class provides ability to detect button presses and map to function execution 
-- If the backlight is off, only enable backlight on first press of a button and don't execute button function
-- Battery voltage monitoring to display
 - Simple web UI to show status of humidity, fan speed and battery voltage
-- Website status, and when active, IP and port shown on display
 - Simple API to return the above raw values, navigate to /api
 
 ### Installation

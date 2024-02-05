@@ -18,18 +18,18 @@ class Environment:
         self.wlan = Wireless_Network(log_level)
         self.display.add_text_line(f"MAC: {self.wlan.mac}")
         self.fan = Fan(self.log_level, self.display, self.wlan)
-        if config.enable_startup_fan_test:
-            self.fan.fan_test()
-        sleep(config.auto_page_scroll_pause_s)
-        self.display.mode = "main"
-        self.display.update_main_display()
-        self.last_weather_poll_s = 0
         self.buttons = []
         if self.display.enabled:
+            self.display.add_text_line(f"Configuring buttons")
             self.init_pico_display_buttons()
+        self.display.add_text_line(f"Init battery monitor")
         self.battery = Battery_Monitor(log_level)
+        self.display.add_text_line(f"Init web server")
         modules = {'fan_module': self.fan, 'battery_monitor': self.battery}
         self.web_app = Web_App(modules)
+        if config.enable_startup_fan_test:
+            self.fan.fan_test()
+        self.last_weather_poll_s = 0     
 
     def init_pico_display_buttons(self) -> None:    
         self.button_a = Button(self.log_level, self.display.BUTTON_A, self.display)
@@ -39,25 +39,35 @@ class Environment:
         self.buttons = [self.button_a, self.button_b, self.button_x, self.button_y]
 
     def main_loop(self) -> None:
-        uasyncio.run(self.wlan.load_uaiohttpclient())
-        
         loop = uasyncio.get_event_loop()
 
+        self.display.add_text_line(f"Loading webserver")
         self.web_app.load_into_loop()
+        self.display.add_text_line(f"Loading web monitor")
         uasyncio.create_task(self.website_status_monitor())
+        self.display.add_text_line(f"Loading net monitor")
         uasyncio.create_task(self.network_status_monitor())
         
         if config.display_enabled:
+            self.display.add_text_line(f"Loading backlight monitor")
             uasyncio.create_task(self.display.manage_backlight_timeout())
         
         if len(self.buttons) > 0:
+            self.display.add_text_line(f"Loading button service")
             self.enable_button_watchers()
             self.button_a.set_function_on_press(Button.test_button_function, [])
         
+        self.display.add_text_line(f"Loading battery monitor")
         self.enable_battery_monitor()
         
+        self.display.add_text_line(f"Starting fan management")
         uasyncio.create_task(self.start_fan_management())
         
+        self.display.add_text_line(f"Entering main loop")
+        sleep(config.auto_page_scroll_pause_s)
+        self.display.mode = "main"
+        self.display.update_main_display()
+
         self.loop_running = True
         loop.run_forever()
 

@@ -42,3 +42,6 @@ voltage_correction = 0.12
 
 ## Web interface
 web_port = 80
+
+## Motion detection
+pir_pin = 21

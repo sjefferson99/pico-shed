@@ -140,24 +140,3 @@ class Wireless_Network:
         else:
             self.logger.warn("Unable to connect to wireless network")
             return False
-
-    async def load_uaiohttpclient(self) -> None:
-        try:
-            import uaiohttpclient
-            self.logger.info("uaiohttpclient module loaded successfully")
-        except:
-            self.logger.warn("uaiohttpclient module not installed, attempting install over wireless...")
-            import mip
-            net_access = await self.check_network_access()
-            if net_access:
-                try:
-                    mip.install("uaiohttpclient")
-                    self.logger.info("uaiohttpclient module installed successfully")
-                    import uaiohttpclient
-                    self.logger.info("uaiohttpclient module loaded successfully")
-                except:
-                    self.logger.critical("Unable to install uaiohttpclient module using mip, exiting as this is required for outdoor humidity lookup")
-                    exit()
-            else:
-                self.logger.critical("Unable to connect to wifi to install uaiohttpclient module, exiting as this is required for outdoor humidity lookup")
-                exit()

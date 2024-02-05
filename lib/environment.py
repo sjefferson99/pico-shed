@@ -39,9 +39,6 @@ class Environment:
         self.buttons = [self.button_a, self.button_b, self.button_x, self.button_y]
 
     def main_loop(self) -> None:
-        self.display.add_text_line(f"Loading uaiohttpclient")
-        uasyncio.run(self.wlan.load_uaiohttpclient())
-        
         loop = uasyncio.get_event_loop()
 
         self.display.add_text_line(f"Loading webserver")

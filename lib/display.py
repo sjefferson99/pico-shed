@@ -23,7 +23,7 @@ class Display:
 
     def init_display(self) -> None:
         self.display = PicoGraphics(display=DISPLAY_PICO_DISPLAY, pen_type=PEN_RGB332, rotate=0)
-        self.auto_page_scroll_pause = config.auto_page_scroll_pause_s
+        self.auto_page_scroll_pause_s = config.auto_page_scroll_pause_s
         self.GREEN = self.display.create_pen(0, 255, 0)
         self.BACKGROUND = self.display.create_pen(51, 153, 102)
         self.WHITE = self.display.create_pen(255, 255, 255)
@@ -108,7 +108,7 @@ class Display:
             self.logger.info(f"Calculated next_y_end: {next_y_end}")
             
             if next_y_end > (self.HEIGHT - self.bottom_margin):
-                sleep(self.auto_page_scroll_pause)
+                sleep(self.auto_page_scroll_pause_s)
                 self.clear_screen()
                 next_y_start = self.current_y
                 next_y_end = next_y_start + (((self.font_height * self.normal_font_scale) + self.line_spacing) * self.get_text_line_count(text, self.normal_font_scale))

@@ -10,7 +10,7 @@ The fan pin should be run through a transistor and not directly connected for cu
 - All code is compatible with AsyncIO
 - BME280 local environment sensing (temperature, humidity, pressure)
 - GPIO on/off/PWM fan control based on comparisons of local area vs environment humidity conditions
-- Debug logging capability - inherited from top fan class
+- Debug logging capability - inherited from top fan class - shows free memory on each entry
 - Basic network status feedback via onboard LED
 - Fan fails to 100% speed if no network to assess outdoor humidity
 - Ensures network connectivity for API calls with configurable retries 

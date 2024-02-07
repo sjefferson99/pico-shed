@@ -50,5 +50,4 @@ motion_light_off_delay = 60
 
 ## Lights
 led_pin = 22
-# LED brightness 1-10
-default_brightness = 10
+default_brightness_pc = 100

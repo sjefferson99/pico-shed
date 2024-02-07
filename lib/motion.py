@@ -13,7 +13,7 @@ class Motion_Detector:
         self.pin = Pin(config.pir_pin, Pin.IN, Pin.PULL_DOWN)
         self.ON = 1
         self.OFF = -1
-        self.motion_detected = 0
+        self.motion_detected = False
         self.motion_updated = uasyncio.Event()
         self.light = Light(log_level)
         self.light_off_delay = config.motion_light_off_delay
@@ -35,7 +35,7 @@ class Motion_Detector:
     
     async def trigger_motion_detected(self) -> None:
         self.logger.info("Motion detected")
-        self.motion_detected = 1
+        self.motion_detected = True
         self.motion_updated.set()
         self.light.on()
 
@@ -43,7 +43,7 @@ class Motion_Detector:
         self.logger.info("Motion no longer detected")
         self.light_off_time = time() + self.light_off_delay
         self.logger.info(f"Time now: {time()} - Light off time {self.light_off_time}")
-        self.motion_detected = 0
+        self.motion_detected = False
         self.motion_updated.set()
     
     async def motion_light_off_timer(self) -> None:
@@ -52,3 +52,6 @@ class Motion_Detector:
                 self.logger.info("Motion light timeout exceeded")
                 self.light.off()
             await uasyncio.sleep_ms(100)
+    
+    def get_state(self) -> bool:
+        return self.motion_detected

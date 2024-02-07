@@ -26,10 +26,10 @@ class Environment:
         self.display.add_text_line(f"Init battery monitor")
         self.battery = Battery_Monitor(log_level)
         self.display.add_text_line(f"Init web server")
-        modules = {'fan_module': self.fan, 'battery_monitor': self.battery}
-        self.web_app = Web_App(modules)
         self.display.add_text_line("Init motion detector")
         self.motion = Motion_Detector(self.log_level)
+        modules = {'fan_module': self.fan, 'battery_monitor': self.battery, 'motion': self.motion, 'light': self.motion.light}
+        self.web_app = Web_App(modules)
         if config.enable_startup_fan_test:
             self.fan.fan_test()
         self.last_weather_poll_s = 0     

@@ -64,7 +64,9 @@ class Environment:
         self.enable_battery_monitor()
 
         self.display.add_text_line(f"Loading motion monitor")
-        self.enable_motion_monitor()
+        uasyncio.create_task(self.motion.motion_monitor())
+        self.display.add_text_line(f"Loading motion light timer")
+        uasyncio.create_task(self.motion.motion_light_off_timer())
         
         self.display.add_text_line(f"Starting fan management")
         uasyncio.create_task(self.start_fan_management())
@@ -84,9 +86,6 @@ class Environment:
     def enable_battery_monitor(self) -> None:
         uasyncio.create_task(self.battery.poll_battery_voltage())
         uasyncio.create_task(self.battery_monitor())
-
-    def enable_motion_monitor(self) -> None:
-        uasyncio.create_task(self.motion.motion_monitor())
 
     async def battery_monitor(self) -> None:
         while True:

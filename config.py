@@ -45,3 +45,10 @@ web_port = 80
 
 ## Motion detection
 pir_pin = 21
+# Seconds for light to remain on after motion no longer detected
+motion_light_off_delay = 60
+
+## Lights
+led_pin = 22
+# LED brightness 1-10
+default_brightness = 10

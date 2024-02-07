@@ -15,7 +15,7 @@ class Motion_Detector:
         self.motion_updated = uasyncio.Event()
 
         self.max_pwm_duty = 65535
-        self.light_pwm_pin = PWM(Pin(20, Pin.OUT))
+        self.light_pwm_pin = PWM(Pin(22, Pin.OUT))
         self.light_pwm_pin.freq(1000)
         self.light_pwm_pin.duty_u16(0)
 

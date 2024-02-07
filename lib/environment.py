@@ -95,12 +95,6 @@ class Environment:
             self.logger.info(f"{self.battery.last_reading_time}: Battery voltage: {self.battery.last_reading}")
             self.display.update_main_display({"battery_voltage": str(round(self.battery.last_reading, 2)) + "v"})
 
-    async def motion_monitor(self) -> None: # Merge this into one display update function
-        while True:
-            await self.motion.motion_updated.wait()
-            self.motion.motion_updated.clear()
-            self.display.update_main_display({"lights": self.motion.motion_detected})
-    
     async def start_fan_management(self) -> None:
         while True:
             uasyncio.create_task(self.fan.assess_fan_state())

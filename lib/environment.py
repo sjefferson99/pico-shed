@@ -8,6 +8,7 @@ from lib.button import Button
 from lib.battery import Battery_Monitor
 from lib.networking import Wireless_Network
 from http.website import Web_App
+from motion import Motion_Detector
 
 class Environment:
     def __init__(self, log_level: int) -> None:
@@ -25,7 +26,9 @@ class Environment:
         self.display.add_text_line(f"Init battery monitor")
         self.battery = Battery_Monitor(log_level)
         self.display.add_text_line(f"Init web server")
-        modules = {'fan_module': self.fan, 'battery_monitor': self.battery}
+        self.display.add_text_line("Init motion detector")
+        self.motion = Motion_Detector(self.log_level)
+        modules = {'fan_module': self.fan, 'battery_monitor': self.battery, 'motion': self.motion, 'light': self.motion.light}
         self.web_app = Web_App(modules)
         if config.enable_startup_fan_test:
             self.fan.fan_test()
@@ -59,6 +62,11 @@ class Environment:
         
         self.display.add_text_line(f"Loading battery monitor")
         self.enable_battery_monitor()
+
+        self.display.add_text_line(f"Loading motion monitor")
+        uasyncio.create_task(self.motion.motion_monitor())
+        self.display.add_text_line(f"Loading motion light timer")
+        uasyncio.create_task(self.motion.motion_light_off_timer())
         
         self.display.add_text_line(f"Starting fan management")
         uasyncio.create_task(self.start_fan_management())
@@ -85,7 +93,7 @@ class Environment:
             self.battery.reading_updated.clear()
             self.logger.info(f"{self.battery.last_reading_time}: Battery voltage: {self.battery.last_reading}")
             self.display.update_main_display({"battery_voltage": str(round(self.battery.last_reading, 2)) + "v"})
-    
+
     async def start_fan_management(self) -> None:
         while True:
             uasyncio.create_task(self.fan.assess_fan_state())

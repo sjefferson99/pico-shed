@@ -3,6 +3,8 @@ import config
 from lib.fan import Fan
 from lib.battery import Battery_Monitor
 from json import dumps
+from lib.light import Light
+from lib.motion import Motion_Detector
 
 class Web_App:
 
@@ -14,6 +16,8 @@ class Web_App:
         self.app = webserver()
         self.fan = module_list['fan_module']
         self.battery_monitor = module_list['battery_monitor']
+        self.motion = module_list['motion']
+        self.light = module_list['light']
         self.running = False
         self.create_homepage()
         self.create_api()
@@ -30,6 +34,9 @@ class Web_App:
             oh = self.fan.get_latest_outdoor_humidity()
             fs = self.fan.get_fan_speed() * 100
             bv = round(self.battery_monitor.read_battery_voltage(), 2)
+            lb = self.light.get_brightness_pc()
+            ls = self.light.get_state()
+            ms = self.motion.get_state()
             html = """
             <html>
                 <body>
@@ -40,11 +47,14 @@ class Web_App:
                         <li>Outdoor humidity: {outdoor_humidity}%</li>
                         <li>Fan speed: {fan_speed}%</li>
                         <li>Battery voltage: {battery_voltage}%</li>
+                        <li>Light brightness: {light_brightness}%</li>
+                        <li>Light state: {light_state}</li>
+                        <li>Motion state: {motion_state}</li>
                     </ul>
                 </body>
             </html>
             
-            """.format(indoor_humidity = ih, outdoor_humidity = oh, fan_speed = fs, battery_voltage = bv)
+            """.format(indoor_humidity = ih, outdoor_humidity = oh, fan_speed = fs, battery_voltage = bv, light_brightness = lb, light_state = ls, motion_state = ms)
             await response.send(html)
 
     def create_api(self) -> None:
@@ -61,6 +71,9 @@ class Web_App:
                         <li>Outdoor humidity: <a href="/api/fan/outdoor_humidity">/api/fan/outdoor_humidity</a></li>
                         <li>Fan speed: <a href="/api/fan/speed">/api/fan/speed</a></li>
                         <li>Battery voltage: <a href="/api/battery/voltage">/api/battery/voltage</a></li>
+                        <li>Light brightness: <a href="/api/light/brightness">/api/light/brightness</a></li>
+                        <li>Light state: <a href="/api/light/state">/api/light/state</a></li>
+                        <li>Motion state: <a href="/api/motion/state">/api/motion/state</a></li>
                     </ul>
                 </body>
             </html>
@@ -72,6 +85,9 @@ class Web_App:
         self.app.add_resource(outdoor_humidity, '/api/fan/outdoor_humidity', fan = self.fan)
         self.app.add_resource(fan_speed, '/api/fan/speed', fan = self.fan)
         self.app.add_resource(battery_voltage, '/api/battery/voltage', battery_monitor = self.battery_monitor)
+        self.app.add_resource(light_brightness, '/api/light/brightness', light = self.light)
+        self.app.add_resource(light_state, '/api/light/state', light = self.light)
+        self.app.add_resource(motion_state, '/api/motion/state', motion = self.motion)
 
 class indoor_humidity():
 
@@ -95,4 +111,22 @@ class battery_voltage():
 
     def get(self, data, battery_monitor: Battery_Monitor):
         html = dumps(round(battery_monitor.read_battery_voltage(), 2))
+        return html
+
+class light_brightness():
+
+    def get(self, data, light: Light):
+        html = dumps(light.get_brightness_pc())
+        return html
+
+class light_state():
+
+    def get(self, data, light: Light):
+        html = dumps(light.get_state())
+        return html
+
+class motion_state():
+
+    def get(self, data, motion: Motion_Detector):
+        html = dumps(motion.get_state())
         return html

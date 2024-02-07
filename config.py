@@ -42,3 +42,12 @@ voltage_correction = 0.12
 
 ## Web interface
 web_port = 80
+
+## Motion detection
+pir_pin = 21
+# Seconds for light to remain on after motion no longer detected
+motion_light_off_delay = 60
+
+## Lights
+led_pin = 22
+default_brightness_pc = 100

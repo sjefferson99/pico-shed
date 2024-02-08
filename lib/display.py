@@ -82,6 +82,11 @@ class Display:
         self.current_y = self.top_margin
         self.update_display()
 
+    def clear_screen2(self) -> None:
+        self.display.set_pen(self.BACKGROUND)
+        self.display.clear()
+        self.current_y = self.top_margin
+
     def print_startup_text(self) -> None:
         self.clear_screen()
         self.display.set_pen(self.WHITE)
@@ -143,3 +148,13 @@ class Display:
                 self.add_text_line(f"Web: {self.display_data['web_server']}")
         else:
             self.logger.info(f"Display update not shown as display disabled: {display_data}")
+
+    def update_primary_display(self) -> None:
+        self.clear_screen2()
+        self.display.set_pen(self.WHITE)
+        next_y_start = self.current_y
+        for item in self.display_data:
+            text = self.display_data[item]
+            self.display.text(text, self.left_margin, next_y_start, self.useable_width, self.normal_font_scale)
+            next_y_start = next_y_start + ((self.font_height * self.normal_font_scale) + self.line_spacing)
+        self.update_display()

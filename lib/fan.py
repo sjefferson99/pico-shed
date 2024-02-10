@@ -14,7 +14,7 @@ class Fan:
         self.display = display
         self.max_pwm_duty = 65535
         self.fan_pwm_pin = PWM(Pin(config.fan_gpio_pin, Pin.OUT))
-        self.fan_pwm_pin.freq(1000)
+        self.fan_pwm_pin.freq(100)
         self.switch_off()
         self.wlan = wlan
         self.display.add_text_line("Init weather API")

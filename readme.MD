@@ -18,7 +18,7 @@ The fan pin should be run through a transistor and not directly connected for cu
 - PWM fan speed control based on humidity differential
 - Disable PWM option for relays or fans that don't support it
 - Configurable fan startup test with LED feedback
-- Pico display pack support (tested with [Pico Dsiplay Pack 240x135](https://shop.pimoroni.com/products/pico-display-pack?variant=32368664215635) and also [Pico Display pack 2 320x240](https://shop.pimoroni.com/products/pico-display-pack-2-0?variant=39374122582099) which currently has a noise border and same smaller usable area) 
+- Pico display pack support (tested with [Pico Display Pack 240x135](https://shop.pimoroni.com/products/pico-display-pack?variant=32368664215635) and also [Pico Display pack 2 320x240](https://shop.pimoroni.com/products/pico-display-pack-2-0?variant=39374122582099) which currently has a noise border and same smaller usable area) 
   - Startup information (Can configure screen pause delay to extract startup output such as MAC)
   - Indoor humidity
   - Outdoor humidity
@@ -55,9 +55,14 @@ Pico W with standard header pins is attached via the stacking headers (to allow 
 - [Pico stacking headers](https://shop.pimoroni.com/products/pico-stacking-headers?variant=39272657682515)
 - [BME280](https://shop.pimoroni.com/products/bme280-breakout?variant=29420960677971)
 - [JST connectors](https://www.amazon.co.uk/gp/product/B09LQGDHV2)
-- [PWM transistor](https://www.amazon.co.uk/gp/product/B07QVZK39F)
-- [Transistor heatsinks](https://www.amazon.co.uk/gp/product/B081GS15N6)
-- 2x resistors for voltage divider for measuring battery voltage
+- 1x [Power FET](https://www.amazon.co.uk/gp/product/B07QVZK39F) for LED strip supporting PWM dimming (Q1)
+- [Power FET heatsinks](https://www.amazon.co.uk/gp/product/B081GS15N6)
+- 2x resistors for voltage divider for measuring battery voltage (22kOhm and 5.1kOhm work well for 12 volts, see voltage monitoring section below) (R1, R2)
+- 1x current limiting resistor for fan BJT transistor 1kOhm (R3)
+- 1x 2N2222 NPN BJT transistor for fan driver (as BJT, GPIO must be protected by current limiting resistor as above) (Q2)
+
+### Circuit diagram
+![circuit diagram](docs/images/circuit_diagram.png)
 
 ### Battery voltage monitoring
 The voltage monitoring is achieved with the onboard ADC that is limited to measuring a maximum of 3.3v, so for higher voltages (I am using a 12v battery), a voltage divider is required.
@@ -79,6 +84,7 @@ Enter the values of the resistors (If possible, measure with a multimeter and ad
      - If failure to connect after retry count, set fan to 100% speed, skip API poll and fan speed adjustment
    - Poll Open-Meteo API
    - Calculate appropriate fan speed and adjust PWM output
+   - Poll various services such as battery monitor
 3. Sleep and loop back to fan speed evaluation
 
 ## LED status key

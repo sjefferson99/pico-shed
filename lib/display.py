@@ -40,7 +40,7 @@ class Display:
         self.current_y = 0
         self.header_font_scale = 3
         self.normal_font_scale = 2
-        self.display_data = {"indoor_humidity": "Unknown", "outdoor_humidity": "Unknown", "fan_speed": "Unknown", "wifi_status": "Unknown", "battery_voltage": "Unknown", "web_server": "Unknown"}
+        self.display_data = {"indoor_humidity": ["IHum", "Unknown"], "outdoor_humidity": ["OHum", "Unknown"], "fan_speed": ["Fan", "Unknown"], "wifi_status": ["Net", "Unknown"], "battery_voltage": ["Batt", "Unknown"], "web_server": ["Web", "Unknown"]}
         self.startup_display()
     
     def startup_display(self) -> None:
@@ -73,16 +73,7 @@ class Display:
                 self.backlight_off()
             await uasyncio.sleep(0.1)
 
-    def update_display(self) -> None:
-        self.display.update()
-
     def clear_screen(self) -> None:
-        self.display.set_pen(self.BACKGROUND)
-        self.display.clear()
-        self.current_y = self.top_margin
-        self.update_display()
-
-    def clear_screen2(self) -> None:
         self.display.set_pen(self.BACKGROUND)
         self.display.clear()
         self.current_y = self.top_margin
@@ -91,7 +82,7 @@ class Display:
         self.clear_screen()
         self.display.set_pen(self.WHITE)
         self.display.text("Starting up...", self.left_margin, self.top_margin, self.useable_width, self.header_font_scale)
-        self.update_display()
+        self.display.update()
         self.current_y = self.current_y + (self.header_font_scale * self.font_height) + self.line_spacing
     
     def get_text_line_count(self, text: str, scale: float) -> int:
@@ -121,7 +112,7 @@ class Display:
             
             self.display.set_pen(self.WHITE)
             self.display.text(text, self.left_margin, next_y_start, self.useable_width, self.normal_font_scale)
-            self.update_display()
+            self.display.update()
             self.current_y = next_y_end
             self.logger.info(f"Current_y now set to : {self.current_y}")
         else:
@@ -130,31 +121,19 @@ class Display:
     def update_main_display_values(self, display_data: dict) -> None:
         for key in display_data:
             if key in self.display_data:
-                self.display_data[key] = display_data[key]
+                self.display_data[key][1] = display_data[key]
                 self.logger.info(f"Updating display item {key} to {display_data[key]}")
             else:
                 self.logger.warn("Invalid display update item")
+        self.update_main_display()
 
-    def update_main_display(self, display_data: dict = {}) -> None:
-        if self.enabled:
-            self.update_main_display_values(display_data)
-            if self.mode == "main":
-                self.clear_screen()
-                self.add_text_line(f"IH: {self.display_data['indoor_humidity']}")
-                self.add_text_line(f"OH: {self.display_data['outdoor_humidity']}")
-                self.add_text_line(f"Fan: {self.display_data['fan_speed']}")
-                self.add_text_line(f"Net: {self.display_data['wifi_status']}")
-                self.add_text_line(f"Batt: {self.display_data['battery_voltage']}")
-                self.add_text_line(f"Web: {self.display_data['web_server']}")
-        else:
-            self.logger.info(f"Display update not shown as display disabled: {display_data}")
-
-    def update_primary_display(self) -> None:
-        self.clear_screen2()
-        self.display.set_pen(self.WHITE)
-        next_y_start = self.current_y
-        for item in self.display_data:
-            text = self.display_data[item]
-            self.display.text(text, self.left_margin, next_y_start, self.useable_width, self.normal_font_scale)
-            next_y_start = next_y_start + ((self.font_height * self.normal_font_scale) + self.line_spacing)
-        self.update_display()
+    def update_main_display(self) -> None:
+        if self.mode == "main":
+            self.clear_screen()
+            self.display.set_pen(self.WHITE)
+            next_y_start = self.current_y
+            for item in self.display_data:
+                text = self.display_data[item][0] + ": " + str(self.display_data[item][1])
+                self.display.text(text, self.left_margin, next_y_start, self.useable_width, self.normal_font_scale)
+                next_y_start = next_y_start + ((self.font_height * self.normal_font_scale) + self.line_spacing)
+            self.display.update()

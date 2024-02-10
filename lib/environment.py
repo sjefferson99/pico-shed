@@ -74,7 +74,7 @@ class Environment:
         self.display.add_text_line(f"Entering main loop")
         sleep(config.auto_page_scroll_pause_s)
         self.display.mode = "main"
-        self.display.update_primary_display()
+        self.display.update_main_display()
 
         self.loop_running = True
         loop.run_forever()
@@ -93,7 +93,6 @@ class Environment:
             self.battery.reading_updated.clear()
             self.logger.info(f"{self.battery.last_reading_time}: Battery voltage: {self.battery.last_reading}")
             self.display.update_main_display_values({"battery_voltage": str(round(self.battery.last_reading, 2)) + "v"})
-            self.display.update_primary_display()
 
     async def start_fan_management(self) -> None:
         while True:
@@ -109,7 +108,6 @@ class Environment:
                 self.display.update_main_display_values({"wifi_status": "Connecting"})
             else:
                 self.display.update_main_display_values({"wifi_status": "Error"})
-            self.display.update_primary_display()
             await uasyncio.sleep(5)
 
     async def website_status_monitor(self) -> None:
@@ -118,5 +116,4 @@ class Environment:
                 self.display.update_main_display_values({"web_server": str(self.wlan.ip) + ":" + str(config.web_port)})
             else:
                 self.display.update_main_display_values({"web_server": "Stopped"})
-            self.display.update_primary_display()
             await uasyncio.sleep(5)

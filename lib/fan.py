@@ -62,7 +62,7 @@ class Fan:
         duty = int(self.max_pwm_duty * speed)
         self.fan_pwm_pin.duty_u16(duty)
         self.logger.info(f"Fan speed set to speed {speed}, which is duty {duty}")
-        self.display.update_main_display({"fan_speed": decimal_to_percent_str(speed)})
+        self.display.update_main_display_values({"fan_speed": decimal_to_percent_str(speed)})
     
     def calculate_required_fan_speed(self, inside_humidity, outside_humidity) -> float:
         speed = 0
@@ -105,7 +105,7 @@ class Fan:
             self.weather_data = await self.weather.get_humidity_async()
             self.readings = self.sensor.get_readings()
             data_ok = self.parse_humidity_data()
-            self.display.update_main_display({"indoor_humidity": self.readings["humidity"], "outdoor_humidity": self.weather_data["humidity"]})
+            self.display.update_main_display_values({"indoor_humidity": self.readings["humidity"], "outdoor_humidity": self.weather_data["humidity"]})
             if data_ok:
                 await self.set_fan_from_humidity(self.readings["humidity"], self.weather_data["humidity"])
             else:

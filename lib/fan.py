@@ -86,14 +86,18 @@ class Fan:
             self.switch_off()
 
     def parse_humidity_data(self) -> bool:
+        self.logger.info(f"Checking humidity data for open meteo: {self.weather_data} and sensor data: {self.readings}")
         data_ok = True
         if "humidity" not in self.weather_data:
             self.weather_data["humidity"] = "Data missing"
             data_ok = False
+            self.logger.warn("Humidity missing from Open Meteo data")
         if "humidity" not in self.readings:
             self.readings["humidity"] = "Data missing"
             data_ok = False
+            self.logger.warn("Humidity missing from sensor data")
         
+        self.logger.info(f"Dato_ok set to: {data_ok}")
         return data_ok
     
     async def assess_fan_state(self) -> None:
@@ -102,7 +106,15 @@ class Fan:
         network_access = await self.wlan.check_network_access()
         
         if network_access == True:
-            self.weather_data = await self.weather.get_humidity_async()
+            
+            self.weather_data = {}
+            try:
+                self.weather_data = await self.weather.get_humidity_async()
+            except:
+                self.logger.error(f"Error encountered querying OpenMeteo API, setting fan to ON")
+                self.switch_on()
+            
+            self.readings = {}
             self.readings = self.sensor.get_readings()
             data_ok = self.parse_humidity_data()
             self.display.update_main_display_values({"indoor_humidity": self.readings["humidity"], "outdoor_humidity": self.weather_data["humidity"]})

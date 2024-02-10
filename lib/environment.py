@@ -18,6 +18,7 @@ class Environment:
         self.display.add_text_line("Configuring WiFi")
         self.wlan = Wireless_Network(log_level)
         self.display.add_text_line(f"MAC: {self.wlan.mac}")
+        self.display.add_text_line("Configuring Fan")
         self.fan = Fan(self.log_level, self.display, self.wlan)
         self.buttons = []
         if self.display.enabled:

@@ -71,8 +71,10 @@ class Web_App:
                         <li>Outdoor humidity: <a href="/api/fan/outdoor_humidity">/api/fan/outdoor_humidity</a></li>
                         <li>Fan speed: <a href="/api/fan/speed">/api/fan/speed</a></li>
                         <li>Battery voltage: <a href="/api/battery/voltage">/api/battery/voltage</a></li>
-                        <li>Light brightness: <a href="/api/light/brightness">/api/light/brightness</a></li>
-                        <li>Light state: <a href="/api/light/state">/api/light/state</a></li>
+                        <li>Light brightness (GET): <a href="/api/light/brightness">/api/light/brightness</a></li>
+                        <li>Light brightness (PUT): Brightness = 0-100 - curl: curl -X PUT http://(IP:port)/api/light/brightness -d "value=50"</li>
+                        <li>Light state (GET): <a href="/api/light/state">/api/light/state</a></li>
+                        <li>Light state (PUT): State = on/off/auto - e.g. curl: curl -X PUT http://(IP:port)/api/light/state -d "state=on"</li>
                         <li>Motion state: <a href="/api/motion/state">/api/motion/state</a></li>
                     </ul>
                 </body>
@@ -86,7 +88,7 @@ class Web_App:
         self.app.add_resource(fan_speed, '/api/fan/speed', fan = self.fan)
         self.app.add_resource(battery_voltage, '/api/battery/voltage', battery_monitor = self.battery_monitor)
         self.app.add_resource(light_brightness, '/api/light/brightness', light = self.light)
-        self.app.add_resource(light_state, '/api/light/state', light = self.light)
+        self.app.add_resource(light_state, '/api/light/state', light = self.light, motion = self.motion)
         self.app.add_resource(motion_state, '/api/motion/state', motion = self.motion)
 
 class indoor_humidity():
@@ -118,11 +120,46 @@ class light_brightness():
     def get(self, data, light: Light):
         html = dumps(light.get_brightness_pc())
         return html
+    
+    def put(self, data, light: Light):
+        html = {}
+        brightness = int(data["value"])
+        if brightness >=0 and brightness <=100:
+            html["requested_brightness"] = brightness
+            light.set_brightness_pc(brightness)
+            brightness_set = light.get_brightness_pc()
+            html["set_brightness"] = brightness_set
+            html["message"] = "Light set to: " + str(brightness_set) +"%"
+        else:
+            html["message"] = "brightness percent not between 0 and 100. PUT data: " + data
+        html["requested_brightness"] = brightness
+        html = dumps(html)
+        return html
 
 class light_state():
 
-    def get(self, data, light: Light):
+    def get(self, data, light: Light, motion: Motion_Detector):
         html = dumps(light.get_state())
+        return html
+    
+    def put(self, data, light: Light, motion: Motion_Detector):
+        html = {}
+        if data["state"] == "on":
+            motion.disable()
+            light.on()
+            html["Message"] = "Light set on"
+        elif data["state"] == "off":
+            motion.disable()
+            light.off()
+            html["Message"] = "Light set off"
+        elif data["state"] == "auto":
+            motion.enable()
+            html["Message"] = "Light set to auto"
+        else:
+            html["Message"] = "Unrecognised light state command"
+        
+        html["state"] = light.get_state()
+        html = dumps(html)
         return html
 
 class motion_state():

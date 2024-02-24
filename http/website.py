@@ -73,7 +73,7 @@ class Web_App:
                         <li>Battery voltage: <a href="/api/battery/voltage">/api/battery/voltage</a></li>
                         <li>Light brightness: <a href="/api/light/brightness">/api/light/brightness</a></li>
                         <li>Light state (GET): <a href="/api/light/state">/api/light/state</a></li>
-                        <li>Light state (PUT): State = On/Off - e.g. curl: curl -X PUT http://<IP:port>/api/light/state -d "state=on"</li>
+                        <li>Light state (PUT): State = on/off/auto - e.g. curl: curl -X PUT http://<IP:port>/api/light/state -d "state=on"</li>
                         <li>Motion state: <a href="/api/motion/state">/api/motion/state</a></li>
                     </ul>
                 </body>
@@ -87,7 +87,7 @@ class Web_App:
         self.app.add_resource(fan_speed, '/api/fan/speed', fan = self.fan)
         self.app.add_resource(battery_voltage, '/api/battery/voltage', battery_monitor = self.battery_monitor)
         self.app.add_resource(light_brightness, '/api/light/brightness', light = self.light)
-        self.app.add_resource(light_state, '/api/light/state', light = self.light)
+        self.app.add_resource(light_state, '/api/light/state', light = self.light, motion = self.motion)
         self.app.add_resource(motion_state, '/api/motion/state', motion = self.motion)
 
 class indoor_humidity():
@@ -122,18 +122,23 @@ class light_brightness():
 
 class light_state():
 
-    def get(self, data, light: Light):
+    def get(self, data, light: Light, motion: Motion_Detector):
         html = dumps(light.get_state())
         return html
     
-    def put(self, data, light: Light):
+    def put(self, data, light: Light, motion: Motion_Detector):
         html = {}
         if data["state"] == "on":
-            light.on() # TODO disable auto off coroutine - Also add auto option to reenable it
+            motion.disable()
+            light.on()
             html["Message"] = "Light set on"
         elif data["state"] == "off":
+            motion.disable()
             light.off()
             html["Message"] = "Light set off"
+        elif data["state"] == "auto":
+            motion.enable()
+            html["Message"] = "Light set to auto"
         else:
             html["Message"] = "Unrecognised light state command"
         

@@ -72,7 +72,8 @@ class Web_App:
                         <li>Fan speed: <a href="/api/fan/speed">/api/fan/speed</a></li>
                         <li>Battery voltage: <a href="/api/battery/voltage">/api/battery/voltage</a></li>
                         <li>Light brightness: <a href="/api/light/brightness">/api/light/brightness</a></li>
-                        <li>Light state: <a href="/api/light/state">/api/light/state</a></li>
+                        <li>Light state (GET): <a href="/api/light/state">/api/light/state</a></li>
+                        <li>Light state (PUT): State = On/Off - e.g. curl: curl -X PUT http://<IP:port>/api/light/state -d "state=on"</li>
                         <li>Motion state: <a href="/api/motion/state">/api/motion/state</a></li>
                     </ul>
                 </body>
@@ -123,6 +124,21 @@ class light_state():
 
     def get(self, data, light: Light):
         html = dumps(light.get_state())
+        return html
+    
+    def put(self, data, light: Light):
+        html = {}
+        if data["state"] == "on":
+            light.on() # TODO disable auto off coroutine - Also add auto option to reenable it
+            html["Message"] = "Light set on"
+        elif data["state"] == "off":
+            light.off()
+            html["Message"] = "Light set off"
+        else:
+            html["Message"] = "Unrecognised light state command"
+        
+        html["state"] = light.get_state()
+        html = dumps(html)
         return html
 
 class motion_state():

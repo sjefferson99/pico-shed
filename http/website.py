@@ -5,6 +5,7 @@ from lib.battery import Battery_Monitor
 from json import dumps
 from lib.light import Light
 from lib.motion import Motion_Detector
+import os
 
 class Web_App:
 
@@ -19,12 +20,26 @@ class Web_App:
         self.motion = module_list['motion']
         self.light = module_list['light']
         self.running = False
+        self.create_js()
         self.create_homepage()
         self.create_api()
+        self.create_light_control()
 
     def load_into_loop(self):
         self.app.run(host='0.0.0.0', port=config.web_port, loop_forever=False)
         self.running = True
+
+    def create_js(self):
+        @self.app.route('/js')
+        async def index(request, response):
+            #await response.start_html()
+            await response.send_file('/http/website.js', content_type='application/javascript')
+    
+    def create_light_control(self):
+        @self.app.route('/light_control')
+        async def index(request, response):
+            #await response.start_html()
+            await response.send_file('/http/light_control.html')
 
     def create_homepage(self) -> None:
         @self.app.route('/')
@@ -38,7 +53,8 @@ class Web_App:
             ls = self.light.get_state()
             ms = self.motion.get_state()
             html = """
-            <html>
+            <!DOCTYPE html>
+            <html lang="en">
                 <body>
                     <h1>Pico environment control</h1>
                     <h2>Live values</h2>
@@ -51,6 +67,8 @@ class Web_App:
                         <li>Light state: {light_state}</li>
                         <li>Motion state: {motion_state}</li>
                     </ul>
+
+                    <a href='light_control'>Light control</a>
                 </body>
             </html>
             

@@ -5,6 +5,7 @@ from lib.battery import Battery_Monitor
 from json import dumps
 from lib.light import Light
 from lib.motion import Motion_Detector
+import os
 
 class Web_App:
 
@@ -19,12 +20,36 @@ class Web_App:
         self.motion = module_list['motion']
         self.light = module_list['light']
         self.running = False
+        self.create_js()
+        self.create_style_css()
+        self.create_light_control_css()
         self.create_homepage()
         self.create_api()
+        self.create_light_control()
 
     def load_into_loop(self):
         self.app.run(host='0.0.0.0', port=config.web_port, loop_forever=False)
         self.running = True
+
+    def create_js(self):
+        @self.app.route('/js/control.js')
+        async def index(request, response):
+            await response.send_file('/http/js/control.js', content_type='application/javascript')
+    
+    def create_style_css(self):
+        @self.app.route('/css/style.css')
+        async def index(request, response):
+            await response.send_file('/http/css/style.css', content_type='text/css')
+
+    def create_light_control_css(self):
+        @self.app.route('/css/light_control.css')
+        async def index(request, response):
+            await response.send_file('/http/css/light_control.css', content_type='text/css')
+    
+    def create_light_control(self):
+        @self.app.route('/html/light_control')
+        async def index(request, response):
+            await response.send_file('/http/html/light_control.html')
 
     def create_homepage(self) -> None:
         @self.app.route('/')
@@ -38,7 +63,11 @@ class Web_App:
             ls = self.light.get_state()
             ms = self.motion.get_state()
             html = """
-            <html>
+            <!DOCTYPE html>
+            <html lang="en">
+            <head>
+                <link rel="stylesheet" href="/css/style.css">
+            </head>
                 <body>
                     <h1>Pico environment control</h1>
                     <h2>Live values</h2>
@@ -51,6 +80,10 @@ class Web_App:
                         <li>Light state: {light_state}</li>
                         <li>Motion state: {motion_state}</li>
                     </ul>
+
+                    <a href='html/light_control'>Light control</a>
+                    <p />
+                    <a href='/api'>API</a>
                 </body>
             </html>
             
@@ -62,7 +95,11 @@ class Web_App:
         async def api(request, response):
             await response.start_html()
             html = """
-            <html>
+            <!DOCTYPE html>
+            <html lang="en">
+            <head>
+                <link rel="stylesheet" href="/css/style.css">
+            </head>
                 <body>
                     <h1>Pico environment control - API</h1>
                     <h2>Endpoints</h2>
@@ -77,6 +114,10 @@ class Web_App:
                         <li>Light state (PUT): State = on/off/auto - e.g. curl: curl -X PUT http://(IP:port)/api/light/state -d "state=on"</li>
                         <li>Motion state: <a href="/api/motion/state">/api/motion/state</a></li>
                     </ul>
+
+                    <p />
+
+                    <a href="/">Home</a>
                 </body>
             </html>
             

@@ -31,9 +31,9 @@ class Environment:
         self.motion = Motion_Detector(self.log_level)
         modules = {'fan_module': self.fan, 'battery_monitor': self.battery, 'motion': self.motion, 'light': self.motion.light}
         self.web_app = Web_App(modules)
-        if config.enable_startup_fan_test:
+        if config.enable_startup_fan_test and config.enable_fan:
             self.fan.fan_test()
-        self.last_weather_poll_s = 0     
+        self.last_weather_poll_s = 0
 
     def init_pico_display_buttons(self) -> None:    
         self.button_a = Button(self.log_level, self.display.BUTTON_A, self.display)
@@ -69,8 +69,9 @@ class Environment:
         self.display.add_text_line(f"Loading motion light timer")
         uasyncio.create_task(self.motion.motion_light_off_timer())
         
-        self.display.add_text_line(f"Starting fan management")
-        uasyncio.create_task(self.start_fan_management())
+        if config.enable_fan:
+            self.display.add_text_line(f"Starting fan management")
+            uasyncio.create_task(self.start_fan_management())
         
         self.display.add_text_line(f"Entering main loop")
         sleep(config.auto_page_scroll_pause_s)

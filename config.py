@@ -45,6 +45,7 @@ voltage_correction = 0.12
 web_port = 80
 
 ## Motion detection
+enable_motion_detection = True
 pir_pin = 21
 # Seconds for light to remain on after motion no longer detected
 motion_light_off_delay = 60

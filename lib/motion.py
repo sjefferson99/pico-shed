@@ -19,8 +19,13 @@ class Motion_Detector:
         self.light_off_delay = config.motion_light_off_delay
         self.light_off_time = 0
         self.enabled = True
+        self.config_enabled = config.enable_motion_detection
 
     async def motion_monitor(self) -> None:
+        if self.config_enabled == False:
+            self.logger.info("Motion disabled in config - motion monitor disabled")
+            return
+        
         old_motion_value = 0
         while True:
             if self.enabled:
@@ -49,6 +54,10 @@ class Motion_Detector:
         self.motion_updated.set()
     
     async def motion_light_off_timer(self) -> None:
+        if self.config_enabled == False:
+            self.logger.info("Motion disabled in config - motion light off timer disabled")
+            return
+        
         while True:
             if self.motion_detected == 0 and self.light_off_time < time() and self.light.get_state() and self.enabled:
                 self.logger.info("Motion light timeout exceeded")

@@ -8,10 +8,11 @@ from lib.ulogging import uLogger
 from lib.helpers import Status_LED
 import uasyncio
 from sys import exit
+from display import Display
 
 class Wireless_Network:
 
-    def __init__(self, log_level: int) -> None:
+    def __init__(self, log_level: int, display: Display) -> None:
         self.logger = uLogger("WIFI", log_level)
         self.status_led = Status_LED(log_level)
         self.wifi_ssid = config.wifi_ssid
@@ -20,6 +21,7 @@ class Wireless_Network:
         rp2.country(self.wifi_country)
         self.disable_power_management = 0xa11140
         self.led_retry_backoff_frequency = 4
+        self.display = display
         
         # Reference: https://datasheets.raspberrypi.com/picow/connecting-to-the-internet-with-pico-w.pdf
         self.CYW43_LINK_DOWN = 0
@@ -51,6 +53,20 @@ class Wireless_Network:
         self.wlan.config(pm=self.disable_power_management)
         self.mac = hexlify(self.wlan.config('mac'),':').decode()
         self.logger.info("MAC: " + self.mac)
+
+    def init_service(self) -> None:
+        uasyncio.create_task(self.network_status_monitor())
+
+    async def network_status_monitor(self) -> None:
+        while True:
+            status = self.dump_status()
+            if status == 3:
+                self.display.update_main_display_values({"wifi_status": "Connected"})
+            elif status >= 0:
+                self.display.update_main_display_values({"wifi_status": "Connecting"})
+            else:
+                self.display.update_main_display_values({"wifi_status": "Error"})
+            await uasyncio.sleep(5)
     
     def dump_status(self):
         status = self.wlan.status()

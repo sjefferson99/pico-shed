@@ -16,7 +16,7 @@ class Environment:
         self.logger = uLogger("Environment", log_level)
         self.display = Display(self.log_level)
         self.display.add_text_line("Configuring WiFi")
-        self.wlan = Wireless_Network(log_level)
+        self.wlan = Wireless_Network(log_level, self.display)
         self.display.add_text_line(f"MAC: {self.wlan.mac}")
         self.display.add_text_line("Configuring Fan")
         self.fan = Fan(self.log_level, self.display, self.wlan)
@@ -29,8 +29,9 @@ class Environment:
         self.display.add_text_line(f"Init web server")
         self.display.add_text_line("Init motion detector")
         self.motion = Motion_Detector(self.log_level)
-        self.modules = {'fan_module': self.fan, 'battery_monitor': self.battery, 'motion': self.motion, 'light': self.motion.light}
-        self.web_app = Web_App(self.modules)
+        self.modules = {'fan': self.fan, 'battery_monitor': self.battery, 'motion': self.motion, 'light': self.motion.light, 'wlan': self.wlan}
+        self.web_app = Web_App(self.log_level, self.modules, self.display)
+        self.modules['web_app'] = self.web_app
         if config.enable_startup_fan_test and config.enable_fan:
             self.fan.fan_test()
         self.last_weather_poll_s = 0
@@ -42,14 +43,7 @@ class Environment:
         self.button_y = Button(self.log_level, self.display.BUTTON_Y, self.display)
         self.buttons = [self.button_a, self.button_b, self.button_x, self.button_y]
 
-    def main_loop(self) -> None:
-        self.display.add_text_line(f"Loading webserver") # TODO ensure there is a wifi check on web server start
-        self.web_app.load_into_loop()
-        self.display.add_text_line(f"Loading web monitor")
-        uasyncio.create_task(self.website_status_monitor())
-        self.display.add_text_line(f"Loading net monitor")
-        uasyncio.create_task(self.network_status_monitor())
-        
+    def main_loop(self) -> None:        
         if config.display_enabled:
             self.display.add_text_line(f"Loading backlight monitor")
             uasyncio.create_task(self.display.manage_backlight_timeout())
@@ -70,26 +64,7 @@ class Environment:
     def enable_button_watchers(self) -> None:
         for button in self.buttons:
             uasyncio.create_task(button.wait_for_press())
-
-    async def network_status_monitor(self) -> None: # TODO Assumes wifi is always trying to be connected but will connect wifi as needed (web server etc)
-        while True:
-            status = self.wlan.dump_status()
-            if status == 3:
-                self.display.update_main_display_values({"wifi_status": "Connected"})
-            elif status >= 0:
-                self.display.update_main_display_values({"wifi_status": "Connecting"})
-            else:
-                self.display.update_main_display_values({"wifi_status": "Error"})
-            await uasyncio.sleep(5)
-
-    async def website_status_monitor(self) -> None:
-        while True:
-            if self.wlan.dump_status() == 3 and self.web_app.running:
-                self.display.update_main_display_values({"web_server": str(self.wlan.ip) + ":" + str(config.web_port)})
-            else:
-                self.display.update_main_display_values({"web_server": "Stopped"})
-            await uasyncio.sleep(5)
-
+    
     def init_modules(self) -> None:
         for module in self.modules:
             self.logger.info(f"Loading {module} service")

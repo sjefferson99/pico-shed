@@ -25,12 +25,12 @@ class Environment:
             self.display.add_text_line(f"Configuring buttons")
             self.init_pico_display_buttons()
         self.display.add_text_line(f"Init battery monitor")
-        self.battery = Battery_Monitor(log_level)
+        self.battery = Battery_Monitor(log_level, self.display)
         self.display.add_text_line(f"Init web server")
         self.display.add_text_line("Init motion detector")
         self.motion = Motion_Detector(self.log_level)
-        modules = {'fan_module': self.fan, 'battery_monitor': self.battery, 'motion': self.motion, 'light': self.motion.light}
-        self.web_app = Web_App(modules)
+        self.modules = {'fan_module': self.fan, 'battery_monitor': self.battery, 'motion': self.motion, 'light': self.motion.light}
+        self.web_app = Web_App(self.modules)
         if config.enable_startup_fan_test and config.enable_fan:
             self.fan.fan_test()
         self.last_weather_poll_s = 0
@@ -43,9 +43,7 @@ class Environment:
         self.buttons = [self.button_a, self.button_b, self.button_x, self.button_y]
 
     def main_loop(self) -> None:
-        loop = uasyncio.get_event_loop()
-
-        self.display.add_text_line(f"Loading webserver")
+        self.display.add_text_line(f"Loading webserver") # TODO ensure there is a wifi check on web server start
         self.web_app.load_into_loop()
         self.display.add_text_line(f"Loading web monitor")
         uasyncio.create_task(self.website_status_monitor())
@@ -61,47 +59,19 @@ class Environment:
             self.enable_button_watchers()
             self.button_a.set_function_on_press(Button.test_button_function, [])
         
-        self.display.add_text_line(f"Loading battery monitor")
-        self.enable_battery_monitor()
-
-        self.display.add_text_line(f"Loading motion monitor")
-        uasyncio.create_task(self.motion.motion_monitor())
-        self.display.add_text_line(f"Loading motion light timer")
-        uasyncio.create_task(self.motion.motion_light_off_timer())
-        
-        if config.enable_fan:
-            self.display.add_text_line(f"Starting fan management")
-            uasyncio.create_task(self.start_fan_management())
-        
         self.display.add_text_line(f"Entering main loop")
         sleep(config.auto_page_scroll_pause_s)
         self.display.mode = "main"
         self.display.update_main_display()
-
         self.loop_running = True
+        loop = uasyncio.get_event_loop()
         loop.run_forever()
 
     def enable_button_watchers(self) -> None:
         for button in self.buttons:
             uasyncio.create_task(button.wait_for_press())
-    
-    def enable_battery_monitor(self) -> None:
-        uasyncio.create_task(self.battery.poll_battery_voltage())
-        uasyncio.create_task(self.battery_monitor())
 
-    async def battery_monitor(self) -> None:
-        while True:
-            await self.battery.reading_updated.wait()
-            self.battery.reading_updated.clear()
-            self.logger.info(f"{self.battery.last_reading_time}: Battery voltage: {self.battery.last_reading}")
-            self.display.update_main_display_values({"battery_voltage": str(round(self.battery.last_reading, 2)) + "v"})
-
-    async def start_fan_management(self) -> None:
-        while True:
-            uasyncio.create_task(self.fan.assess_fan_state())
-            await uasyncio.sleep(config.weather_poll_frequency_in_seconds)
-    
-    async def network_status_monitor(self) -> None:
+    async def network_status_monitor(self) -> None: # TODO Assumes wifi is always trying to be connected but will connect wifi as needed (web server etc)
         while True:
             status = self.wlan.dump_status()
             if status == 3:
@@ -119,3 +89,9 @@ class Environment:
             else:
                 self.display.update_main_display_values({"web_server": "Stopped"})
             await uasyncio.sleep(5)
+
+    def init_modules(self) -> None:
+        for module in self.modules:
+            self.logger.info(f"Loading {module} service")
+            self.display.add_text_line(f"Loading {module} service")
+            self.modules[module].init_service()

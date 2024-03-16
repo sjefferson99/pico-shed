@@ -53,6 +53,7 @@ function setLightState(state) {
     })
     .then(data => {
         console.log(data);
+        updateElementFromAPI('light_state', '/api/light/state');
     })
     .catch(error => {
         console.error('There was a problem with your fetch operation:', error);

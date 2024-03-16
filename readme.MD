@@ -101,3 +101,11 @@ The LED shows the status of the board, which combined with the execution order a
 |Network connection back off|Flash @ 4Hz for backoff duration in config file|Waiting to retry connection|
 |Set fan speed|1 flash @ 1Hz|Fan turned on|
 |Set fan speed|2 flashes @ 1Hz|Fan turned off|
+
+## Development
+### Adding new modules
+If you are adding a new module that should be made available to the website API or have a startup service, add an instance of the module class to the modules dict in the init of environment.py
+
+This will make it available to the website app.
+
+The module will also need to have an init_service function even if it just contains "pass" as all modules in the dict have this function called to initialise any one off or coroutine functions.

@@ -24,7 +24,14 @@ class Environment:
         self.display.add_text_line("Configuring motion detector")
         self.motion = Motion_Detector(self.log_level)
         self.display.add_text_line(f"Configuring web server")
-        self.modules = {'fan': self.fan, 'battery_monitor': self.battery, 'motion': self.motion, 'light': self.motion.light, 'wlan': self.wlan, 'display': self.display}
+        self.modules = {
+                        'fan': self.fan,
+                        'battery_monitor': self.battery,
+                        'motion': self.motion,
+                        'light': self.motion.light,
+                        'wlan': self.wlan,
+                        'display': self.display
+                        }
         self.web_app = Web_App(self.log_level, self.modules)
         self.modules['web_app'] = self.web_app
 

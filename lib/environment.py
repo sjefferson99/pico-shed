@@ -4,7 +4,6 @@ from lib.ulogging import uLogger
 from time import sleep
 import config
 import uasyncio
-from lib.button import Button
 from lib.battery import Battery_Monitor
 from lib.networking import Wireless_Network
 from http.website import Web_App
@@ -28,8 +27,6 @@ class Environment:
         self.modules = {'fan': self.fan, 'battery_monitor': self.battery, 'motion': self.motion, 'light': self.motion.light, 'wlan': self.wlan, 'display': self.display}
         self.web_app = Web_App(self.log_level, self.modules)
         self.modules['web_app'] = self.web_app
-        
-        self.last_weather_poll_s = 0
 
     def main_loop(self) -> None:                
         self.display.add_text_line(f"Entering main loop")

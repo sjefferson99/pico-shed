@@ -114,7 +114,7 @@ class Fan:
             data_ok = False
             self.logger.warn("Humidity missing from sensor data")
         
-        self.logger.info(f"Dato_ok set to: {data_ok}")
+        self.logger.info(f"Data_ok set to: {data_ok}")
         return data_ok
     
     async def assess_fan_state(self) -> None:

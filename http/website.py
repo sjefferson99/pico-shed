@@ -5,10 +5,8 @@ from lib.battery import Battery_Monitor
 from json import dumps
 from lib.light import Light
 from lib.motion import Motion_Detector
-from lib.networking import Wireless_Network
 from logging import Logger
 import uasyncio
-from lib.display import Display
 
 class Web_App:
 

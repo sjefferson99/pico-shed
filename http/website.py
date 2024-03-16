@@ -12,7 +12,7 @@ from lib.display import Display
 
 class Web_App:
 
-    def __init__(self, log_level: int, module_list: dict, display: Display) -> None:
+    def __init__(self, log_level: int, module_list: dict) -> None:
         """
         module_list is a dictionary of required modules, this should take the structure:
         {'fan_module': Fan, 'battery_monitor': Battery_Monitor}
@@ -24,7 +24,7 @@ class Web_App:
         self.motion = module_list['motion']
         self.light = module_list['light']
         self.wlan = module_list['wlan']
-        self.display = display
+        self.display = module_list['display']
         self.running = False
         self.create_js()
         self.create_style_css()

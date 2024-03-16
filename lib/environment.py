@@ -28,8 +28,7 @@ class Environment:
         self.modules = {'fan': self.fan, 'battery_monitor': self.battery, 'motion': self.motion, 'light': self.motion.light, 'wlan': self.wlan, 'display': self.display}
         self.web_app = Web_App(self.log_level, self.modules)
         self.modules['web_app'] = self.web_app
-        if config.enable_startup_fan_test and config.enable_fan:
-            self.fan.fan_test()
+        
         self.last_weather_poll_s = 0
 
     def main_loop(self) -> None:                

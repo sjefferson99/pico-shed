@@ -28,6 +28,8 @@ class Fan:
         self.readings = {}
         self.weather_data = {}
         self.config_enabled = config.enable_fan
+        if config.enable_startup_fan_test and config.enable_fan:
+            self.fan_test()
     
     def init_service(self) -> None:
         self.logger.info("Loading fan management")

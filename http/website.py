@@ -26,10 +26,8 @@ class Web_App:
         self.running = False
         self.create_js()
         self.create_style_css()
-        self.create_light_control_css()
         self.create_homepage()
         self.create_api()
-        self.create_light_control()
 
     def init_service(self):
         network_access = uasyncio.run(self.wlan.check_network_access())
@@ -52,97 +50,24 @@ class Web_App:
             await uasyncio.sleep(5)
 
     def create_js(self):
-        @self.app.route('/js/control.js')
+        @self.app.route('/js/api.js')
         async def index(request, response):
-            await response.send_file('/http/js/control.js', content_type='application/javascript')
+            await response.send_file('/http/html/js/api.js', content_type='application/javascript')
     
     def create_style_css(self):
         @self.app.route('/css/style.css')
         async def index(request, response):
-            await response.send_file('/http/css/style.css', content_type='text/css')
-
-    def create_light_control_css(self):
-        @self.app.route('/css/light_control.css')
-        async def index(request, response):
-            await response.send_file('/http/css/light_control.css', content_type='text/css')
+            await response.send_file('/http/html/css/style.css', content_type='text/css')
     
-    def create_light_control(self):
-        @self.app.route('/html/light_control')
-        async def index(request, response):
-            await response.send_file('/http/html/light_control.html')
-
     def create_homepage(self) -> None:
         @self.app.route('/')
         async def index(request, response):
-            await response.start_html()
-            ih = self.fan.get_latest_indoor_humidity()
-            oh = self.fan.get_latest_outdoor_humidity()
-            fs = self.fan.get_fan_speed() * 100
-            bv = round(self.battery_monitor.read_battery_voltage(), 2)
-            lb = self.light.get_brightness_pc()
-            ls = self.light.get_state()
-            ms = self.motion.get_state()
-            html = """
-            <!DOCTYPE html>
-            <html lang="en">
-            <head>
-                <link rel="stylesheet" href="/css/style.css">
-            </head>
-                <body>
-                    <h1>Pico environment control</h1>
-                    <h2>Live values</h2>
-                    <ul>
-                        <li>Indoor humidity: {indoor_humidity}%</li>
-                        <li>Outdoor humidity: {outdoor_humidity}%</li>
-                        <li>Fan speed: {fan_speed}%</li>
-                        <li>Battery voltage: {battery_voltage}%</li>
-                        <li>Light brightness: {light_brightness}%</li>
-                        <li>Light state: {light_state}</li>
-                        <li>Motion state: {motion_state}</li>
-                    </ul>
-
-                    <a href='html/light_control'>Light control</a>
-                    <p />
-                    <a href='/api'>API</a>
-                </body>
-            </html>
-            
-            """.format(indoor_humidity = ih, outdoor_humidity = oh, fan_speed = fs, battery_voltage = bv, light_brightness = lb, light_state = ls, motion_state = ms)
-            await response.send(html)
+            await response.send_file('/http/html/index.html')
 
     def create_api(self) -> None:
         @self.app.route('/api')
         async def api(request, response):
-            await response.start_html()
-            html = """
-            <!DOCTYPE html>
-            <html lang="en">
-            <head>
-                <link rel="stylesheet" href="/css/style.css">
-            </head>
-                <body>
-                    <h1>Pico environment control - API</h1>
-                    <h2>Endpoints</h2>
-                    <ul>
-                        <li>Indoor humidity: <a href="/api/fan/indoor_humidity">/api/fan/indoor_humidity</a></li>
-                        <li>Outdoor humidity: <a href="/api/fan/outdoor_humidity">/api/fan/outdoor_humidity</a></li>
-                        <li>Fan speed: <a href="/api/fan/speed">/api/fan/speed</a></li>
-                        <li>Battery voltage: <a href="/api/battery/voltage">/api/battery/voltage</a></li>
-                        <li>Light brightness (GET): <a href="/api/light/brightness">/api/light/brightness</a></li>
-                        <li>Light brightness (PUT): Brightness = 0-100 - curl: curl -X PUT http://(IP:port)/api/light/brightness -d "value=50"</li>
-                        <li>Light state (GET): <a href="/api/light/state">/api/light/state</a></li>
-                        <li>Light state (PUT): State = on/off/auto - e.g. curl: curl -X PUT http://(IP:port)/api/light/state -d "state=on"</li>
-                        <li>Motion state: <a href="/api/motion/state">/api/motion/state</a></li>
-                    </ul>
-
-                    <p />
-
-                    <a href="/">Home</a>
-                </body>
-            </html>
-            
-            """
-            await response.send(html)
+            await response.send_file('/http/html/api.html')
         
         self.app.add_resource(indoor_humidity, '/api/fan/indoor_humidity', fan = self.fan)
         self.app.add_resource(outdoor_humidity, '/api/fan/outdoor_humidity', fan = self.fan)

@@ -21,6 +21,12 @@ class Motion_Detector:
         self.enabled = True
         self.config_enabled = config.enable_motion_detection
 
+    def init_service(self) -> None:
+        self.logger.info("Loading motion monitor")
+        uasyncio.create_task(self.motion_monitor())
+        self.logger.info("Loading motion light timer")
+        uasyncio.create_task(self.motion_light_off_timer())
+    
     async def motion_monitor(self) -> None:
         if self.config_enabled == False:
             self.logger.info("Motion disabled in config - motion monitor disabled")

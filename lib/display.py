@@ -5,17 +5,20 @@ import config
 from time import sleep
 from utime import ticks_ms
 import uasyncio
+from lib.button import Button
 
 class Display:
     def __init__(self, log_level: int) -> None:
-        self.logger = uLogger("Display", log_level)
+        self.log_level = log_level
+        self.logger = uLogger("Display", self.log_level)
         self.logger.info("Init Display")
-        self.enabled = config.display_enabled
+        self.enabled = config.enable_display
         if self.enabled:
             self.init_display()
         else:
             self.logger.info("Display disabled in config")
     
+        self.buttons = []
         self.BUTTON_A = 12
         self.BUTTON_B = 13
         self.BUTTON_X = 14
@@ -50,6 +53,27 @@ class Display:
         self.backlight_on()
         self.print_startup_text()
 
+    def init_service(self) -> None:
+        self.logger.info("Loading backlight monitor")
+        uasyncio.create_task(self.manage_backlight_timeout())
+        self.logger.info("Init buttons")
+        self.init_pico_display_buttons()
+        self.logger.info("Loading button service")
+        self.enable_button_watchers()
+        self.logger.info("Configuring button A")
+        self.button_a.set_function_on_press(Button.test_button_function, [])
+    
+    def init_pico_display_buttons(self) -> None:    
+        self.button_a = Button(self.log_level, self.BUTTON_A, self)
+        self.button_b = Button(self.log_level, self.BUTTON_B, self)
+        self.button_x = Button(self.log_level, self.BUTTON_X, self)
+        self.button_y = Button(self.log_level, self.BUTTON_Y, self)
+        self.buttons = [self.button_a, self.button_b, self.button_x, self.button_y]
+
+    def enable_button_watchers(self) -> None:
+        for button in self.buttons:
+            uasyncio.create_task(button.wait_for_press())
+
     def backlight_on(self) -> None:
         self.logger.info("Backlight on")
         self.display.set_backlight(1.0)
@@ -67,11 +91,14 @@ class Display:
             return False
     
     async def manage_backlight_timeout(self) -> None:
-        self.logger.info("Starting backlight timeout management")
-        while True:
-            if self.should_backlight_be_switched_off():
-                self.backlight_off()
-            await uasyncio.sleep(0.1)
+        if self.enabled:
+            self.logger.info("Starting backlight timeout management")
+            while True:
+                if self.should_backlight_be_switched_off():
+                    self.backlight_off()
+                await uasyncio.sleep(0.1)
+        else:
+            self.logger.info("Display not enabled - backlight monitor not started")
 
     def clear_screen(self) -> None:
         self.display.set_pen(self.BACKGROUND)

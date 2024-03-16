@@ -12,6 +12,9 @@ class Light:
         self.pwm_pin.freq(1000)
         self.brightness_pc = config.default_brightness_pc
         self.off()
+
+    def init_service(self) -> None:
+        self.logger.info("Init light management (stub)")
     
     def brightness_to_corrected_duty(self, brightness: float) -> float:
         decimal = brightness / 100

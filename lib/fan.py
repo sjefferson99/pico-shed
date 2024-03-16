@@ -6,6 +6,7 @@ from lib.open_meteo import Weather_API
 from lib.bme_280 import BME_280
 from lib.ulogging import uLogger
 from lib.display import Display
+import uasyncio
 
 class Fan:
     def __init__(self, log_level: int, display: Display, wlan: Wireless_Network) -> None:
@@ -26,6 +27,22 @@ class Fan:
         self.humidity_hysteresis_pc = config.humidity_hysteresis_pc
         self.readings = {}
         self.weather_data = {}
+        self.config_enabled = config.enable_fan
+        if config.enable_startup_fan_test and config.enable_fan:
+            self.fan_test()
+    
+    def init_service(self) -> None:
+        self.logger.info("Loading fan management")
+        uasyncio.create_task(self.start_fan_management())
+    
+    async def start_fan_management(self) -> None:
+        if self.config_enabled == False:
+            self.logger.info("Fan disabled in config - fan management disabled")
+            return
+        
+        while True:
+            uasyncio.create_task(self.assess_fan_state())
+            await uasyncio.sleep(config.weather_poll_frequency_in_seconds)
     
     def pwm_fan_test(self) -> None:
         self.set_speed(0.1)
@@ -97,7 +114,7 @@ class Fan:
             data_ok = False
             self.logger.warn("Humidity missing from sensor data")
         
-        self.logger.info(f"Dato_ok set to: {data_ok}")
+        self.logger.info(f"Data_ok set to: {data_ok}")
         return data_ok
     
     async def assess_fan_state(self) -> None:

@@ -5,20 +5,24 @@ from lib.battery import Battery_Monitor
 from json import dumps
 from lib.light import Light
 from lib.motion import Motion_Detector
-import os
+from logging import Logger
+import uasyncio
 
 class Web_App:
 
-    def __init__(self, module_list: dict) -> None:
+    def __init__(self, log_level: int, module_list: dict) -> None:
         """
         module_list is a dictionary of required modules, this should take the structure:
         {'fan_module': Fan, 'battery_monitor': Battery_Monitor}
         """
+        self.logger = Logger(log_level)
         self.app = webserver()
-        self.fan = module_list['fan_module']
+        self.fan = module_list['fan']
         self.battery_monitor = module_list['battery_monitor']
         self.motion = module_list['motion']
         self.light = module_list['light']
+        self.wlan = module_list['wlan']
+        self.display = module_list['display']
         self.running = False
         self.create_js()
         self.create_style_css()
@@ -27,9 +31,25 @@ class Web_App:
         self.create_api()
         self.create_light_control()
 
-    def load_into_loop(self):
-        self.app.run(host='0.0.0.0', port=config.web_port, loop_forever=False)
-        self.running = True
+    def init_service(self):
+        network_access = uasyncio.run(self.wlan.check_network_access())
+
+        if network_access == True:
+            self.logger.info("Starting web server")
+            self.app.run(host='0.0.0.0', port=config.web_port, loop_forever=False)
+            self.running = True
+            self.logger.info("Starting web monitor")
+            uasyncio.create_task(self.status_monitor())
+        else:
+            self.logger.error("No network access - web server not started")
+    
+    async def status_monitor(self) -> None:
+        while True:
+            if self.wlan.dump_status() == 3 and self.running:
+                self.display.update_main_display_values({"web_server": str(self.wlan.ip) + ":" + str(config.web_port)})
+            else:
+                self.display.update_main_display_values({"web_server": "Stopped"})
+            await uasyncio.sleep(5)
 
     def create_js(self):
         @self.app.route('/js/control.js')

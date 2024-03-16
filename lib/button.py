@@ -1,11 +1,10 @@
 from machine import Pin
 import uasyncio
 from lib.ulogging import uLogger
-from lib.display import Display
 
 class Button:
 
-    def __init__(self, log_level: int, GPIO_pin: int, display: Display) -> None:
+    def __init__(self, log_level: int, GPIO_pin: int, display) -> None:
         self.log_level = log_level
         self.logger = uLogger(f"Button {GPIO_pin}", log_level)
         self.pin = Pin(GPIO_pin, Pin.IN, Pin.PULL_UP)

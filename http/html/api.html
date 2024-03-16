@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+    <body>
+        <h1>Pico environment control - API</h1>
+        <h2>Endpoints</h2>
+        <ul>
+            <li>Indoor humidity (GET): <a href="/api/fan/indoor_humidity">/api/fan/indoor_humidity</a></li>
+            <li>Outdoor humidity (GET): <a href="/api/fan/outdoor_humidity">/api/fan/outdoor_humidity</a></li>
+            <li>Fan speed (GET): <a href="/api/fan/speed">/api/fan/speed</a></li>
+            <li>Battery voltage (GET): <a href="/api/battery/voltage">/api/battery/voltage</a></li>
+            <li>Light brightness (GET): <a href="/api/light/brightness">/api/light/brightness</a></li>
+            <li>Light brightness (PUT): Brightness = 0-100 - curl: curl -X PUT http://(IP:port)/api/light/brightness -d "value=50"</li>
+            <li>Light state (GET): <a href="/api/light/state">/api/light/state</a></li>
+            <li>Light state (PUT): State = on/off/auto - e.g. curl: curl -X PUT http://(IP:port)/api/light/state -d "state=on"</li>
+            <li>Motion state (GET): <a href="/api/motion/state">/api/motion/state</a></li>
+        </ul>
+
+        <p />
+
+        <a href="/">Home</a>
+    </body>
+</html>

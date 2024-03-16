@@ -18,6 +18,7 @@ weather_poll_frequency_in_seconds = 300
 i2c_pins = {"sda": 0, "scl": 1}
 
 ## Fan
+enable_fan = True
 fan_gpio_pin = 2
 # How much dryer in RH % outside before the fan turns on
 humidity_hysteresis_pc = 1
@@ -26,7 +27,7 @@ enable_PWM_fan_speed = False
 enable_startup_fan_test = True
 
 ## Display Supports Pico Display and Pico Display 2 (with extra space as unused border)
-display_enabled = True
+enable_display = True
 # Seconds to pause each auto scrolling information page (startup) for troubleshooting
 auto_page_scroll_pause_s = 0
 backlight_timeout_s = 30
@@ -44,6 +45,7 @@ voltage_correction = 0.12
 web_port = 80
 
 ## Motion detection
+enable_motion_detection = True
 pir_pin = 21
 # Seconds for light to remain on after motion no longer detected
 motion_light_off_delay = 60

@@ -30,8 +30,21 @@ The fan pin should be run through a transistor and not directly connected for cu
   - If the backlight is off, only enable backlight on first press of a button and don't execute button function
 - Async button class provides ability to detect button presses and map to function execution 
 - PIR detector allows motion controlled lights with configurable timeout
-- Simple web UI to show status of humidity, fan speed, battery voltage, light brightness, light state and motion state
-- Simple API to return the above raw values, navigate to /api
+- Web interface
+  - Home screen shows status of humidity, fan speed, battery voltage, light brightness, light state and motion state
+  - Light control page allows control of light on, off or auto (motion detect) using buttons on the web page
+- API navigate to /api for list of functions and how to use
+  - GET
+    - Indoor humidity
+    - Outdoor humidity
+    - Fan speed
+    - Battery voltage
+    - Light brightness
+    - Light state
+    - Motion detection state
+  - PUT
+    - Light brightness
+    - Light state
 
 ### Installation
 ###  Firmware
@@ -101,3 +114,11 @@ The LED shows the status of the board, which combined with the execution order a
 |Network connection back off|Flash @ 4Hz for backoff duration in config file|Waiting to retry connection|
 |Set fan speed|1 flash @ 1Hz|Fan turned on|
 |Set fan speed|2 flashes @ 1Hz|Fan turned off|
+
+## Development
+### Adding new modules
+If you are adding a new module that should be made available to the website API or have a startup service, add an instance of the module class to the modules dict in the init of environment.py
+
+This will make it available to the website app.
+
+The module will also need to have an init_service function even if it just contains "pass" as all modules in the dict have this function called to initialise any one off or coroutine functions.

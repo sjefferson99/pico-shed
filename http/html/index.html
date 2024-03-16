@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <link rel="stylesheet" href="css/style.css">
+    </head>
+    <body>
+        <h1>Pico environment control</h1>
+        
+        <h2>Live values</h2>
+        <ul>
+            <li>Indoor humidity: <span id="indoor_humidity"></span>%</li>
+            <li>Outdoor humidity: <span id="outdoor_humidity"></span>%</li>
+            <li>Fan speed: <span id="fan_speed"></span>%</li>
+            <li>Battery voltage: <span id="battery_voltage"></span>%</li>
+            <li>Light brightness: <span id="light_brightness"></span>%</li>
+            <li>Light state: <span id="light_state"></span></li>
+            <li>Motion state: <span id="motion_state"></span></li>
+        </ul>
+
+        <h2>Light control</h2>
+        <button id="light_on" class="" onclick="setLightState('on')">On</button>
+        <button id="light_on" class="" onclick="setLightState('off')">Off</button>
+        <button id="light_on" class="" onclick="setLightState('auto')">Auto</button>
+
+        <p />
+        <a href='/api'>API</a>
+
+        <script src="/js/api.js"></script>
+    </body>
+</html>

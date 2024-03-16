@@ -18,19 +18,32 @@ class Motion_Detector:
         self.light = Light(log_level)
         self.light_off_delay = config.motion_light_off_delay
         self.light_off_time = 0
+        self.enabled = True
+        self.config_enabled = config.enable_motion_detection
 
+    def init_service(self) -> None:
+        self.logger.info("Loading motion monitor")
+        uasyncio.create_task(self.motion_monitor())
+        self.logger.info("Loading motion light timer")
+        uasyncio.create_task(self.motion_light_off_timer())
+    
     async def motion_monitor(self) -> None:
+        if self.config_enabled == False:
+            self.logger.info("Motion disabled in config - motion monitor disabled")
+            return
+        
         old_motion_value = 0
         while True:
-            new_motion_value = self.pin.value()
-            transition = new_motion_value - old_motion_value
-            
-            if transition == self.ON:
-                await self.trigger_motion_detected()
-            if transition == self.OFF:
-                await self.trigger_motion_no_longer_detected()
-            
-            old_motion_value = new_motion_value
+            if self.enabled:
+                new_motion_value = self.pin.value()
+                transition = new_motion_value - old_motion_value
+                
+                if transition == self.ON:
+                    await self.trigger_motion_detected()
+                if transition == self.OFF:
+                    await self.trigger_motion_no_longer_detected()
+                
+                old_motion_value = new_motion_value
             await uasyncio.sleep_ms(500)
     
     async def trigger_motion_detected(self) -> None:
@@ -47,11 +60,25 @@ class Motion_Detector:
         self.motion_updated.set()
     
     async def motion_light_off_timer(self) -> None:
+        if self.config_enabled == False:
+            self.logger.info("Motion disabled in config - motion light off timer disabled")
+            return
+        
         while True:
-            if self.motion_detected == 0 and self.light_off_time < time() and self.light.get_state():
+            if self.motion_detected == 0 and self.light_off_time < time() and self.light.get_state() and self.enabled:
                 self.logger.info("Motion light timeout exceeded")
                 self.light.off()
             await uasyncio.sleep_ms(100)
     
     def get_state(self) -> bool:
         return self.motion_detected
+    
+    def enable(self) -> None:
+        self.logger.info("Motion detection enabled")
+        self.enabled = True
+        return
+
+    def disable(self) -> None:
+        self.logger.info("Motion detection disabled")
+        self.enabled = False
+        return

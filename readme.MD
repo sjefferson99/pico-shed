@@ -45,7 +45,7 @@ The fan pin should be run through a transistor and not directly connected for cu
   - PUT
     - Light brightness
     - Light state
--HomeAssistant integration
+- HomeAssistant integration
   - This is very Beta but I have a PoC with basic light control and further development planned at (pico-environment-ha)[https://github.com/sjefferson99/pico-environment-ha]
 
 ### Installation

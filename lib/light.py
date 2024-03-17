@@ -22,7 +22,7 @@ class Light:
         return square
     
     def off(self) -> None:
-        self.logger.info("Turning light on")
+        self.logger.info("Turning light off")
         self.pwm_pin.duty_u16(0)
 
     def on(self) -> None:

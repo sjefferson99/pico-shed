@@ -76,6 +76,7 @@ class Web_App:
         self.app.add_resource(light_brightness, '/api/light/brightness', light = self.light)
         self.app.add_resource(light_state, '/api/light/state', light = self.light, motion = self.motion)
         self.app.add_resource(motion_state, '/api/motion/state', motion = self.motion)
+        self.app.add_resource(wlan_mac, '/api/wlan/mac', wlan = self.wlan)
 
 class indoor_humidity():
 
@@ -152,4 +153,10 @@ class motion_state():
 
     def get(self, data, motion: Motion_Detector):
         html = dumps(motion.get_state())
+        return html
+    
+class wlan_mac():
+
+    def get(self, data, wlan):
+        html = dumps(wlan.get_mac())
         return html

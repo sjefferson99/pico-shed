@@ -6,6 +6,7 @@ document.addEventListener('DOMContentLoaded', function() {
     updateElementFromAPI('light_brightness', '/api/light/brightness');
     updateElementFromAPI('light_state', '/api/light/state');
     updateElementFromAPI('motion_state', '/api/motion/state');
+    updateElementFromAPI('mac_address', '/api/wlan/mac');
 });
 
 /**

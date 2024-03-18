@@ -156,3 +156,6 @@ class Wireless_Network:
         else:
             self.logger.warn("Unable to connect to wireless network")
             return False
+        
+    def get_mac(self) -> str:
+        return self.mac

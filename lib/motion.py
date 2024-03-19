@@ -82,3 +82,6 @@ class Motion_Detector:
         self.logger.info("Motion detection disabled")
         self.enabled = False
         return
+    
+    def get_enabled(self) -> bool:
+        return self.enabled

@@ -75,6 +75,7 @@ class Web_App:
         self.app.add_resource(battery_voltage, '/api/battery/voltage', battery_monitor = self.battery_monitor, logger = self.ulogger)
         self.app.add_resource(light_brightness, '/api/light/brightness', light = self.light, logger = self.ulogger)
         self.app.add_resource(light_state, '/api/light/state', light = self.light, motion = self.motion, logger = self.ulogger)
+        self.app.add_resource(light_motion_detection, '/api/light/motion_detection', motion = self.motion, logger = self.ulogger)
         self.app.add_resource(motion_state, '/api/motion/state', motion = self.motion, logger = self.ulogger)
         self.app.add_resource(wlan_mac, '/api/wlan/mac', wlan = self.wlan, logger = self.ulogger)
 
@@ -154,14 +155,34 @@ class light_state():
             motion.disable()
             light.off()
             html["Message"] = "Light set off"
-        elif data["state"] == "auto":
-            motion.enable()
-            html["Message"] = "Light set to auto"
         else:
             html["Message"] = "Unrecognised light state command"
         
-        html["state"] = light.get_state()
-        html = dumps(html)
+        html = dumps(light.get_state())
+        logger.info(f"Return value: {html}")
+        return html
+    
+class light_motion_detection():
+
+    def get(self, data, motion: Motion_Detector, logger: uLogger):
+        logger.info("API request - light/motion_detection")
+        html = dumps(motion.get_enabled())
+        logger.info(f"Return value: {html}")
+        return html
+    
+    def put(self, data, motion: Motion_Detector, logger: uLogger):
+        logger.info("API request - (PUT) light/motion_detection)")
+        html = {}
+        if data["state"] == "enabled":
+            motion.enable()
+            html["Message"] = "Light motion detection enabled"
+        elif data["state"] == "disabled":
+            motion.disable()
+            html["Message"] = "Light motion detection disabled"
+        else:
+            html["Message"] = "Unrecognised light motion detection command"
+        
+        html = dumps(motion.get_enabled())
         logger.info(f"Return value: {html}")
         return html
 

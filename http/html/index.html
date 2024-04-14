@@ -14,13 +14,16 @@
             <li>Battery voltage: <span id="battery_voltage"></span>v</li>
             <li>Light brightness: <span id="light_brightness"></span>%</li>
             <li>Light state: <span id="light_state"></span></li>
+            <li>Light motion detection: <span id="light_motion_detection"></span></li>
             <li>Motion state: <span id="motion_state"></span></li>
+            <li>MAC address: <span id="mac_address"></span></li>
         </ul>
 
         <h2>Light control</h2>
         <button id="light_on" class="" onclick="setLightState('on')">On</button>
-        <button id="light_on" class="" onclick="setLightState('off')">Off</button>
-        <button id="light_on" class="" onclick="setLightState('auto')">Auto</button>
+        <button id="light_off" class="" onclick="setLightState('off')">Off</button>
+        <button id="light_motion_on" class="" onclick="setLightMotionDetection('enabled')">Motion on</button>
+        <button id="light_motion_off" class="" onclick="setLightMotionDetection('disabled')">Motion off</button>
 
         <p />
         <a href='/api'>API</a>

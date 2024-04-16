@@ -35,6 +35,7 @@ The fan pin should be run through a transistor and not directly connected for cu
   - Light control page allows control of light on, off or auto (motion detect) using buttons on the web page
 - API navigate to /api for list of functions and how to use
   - GET
+    - Firmware version
     - Indoor humidity
     - Outdoor humidity
     - Fan speed
@@ -43,6 +44,7 @@ The fan pin should be run through a transistor and not directly connected for cu
     - Light state
     - Light motion detection enabled
     - Motion detection state
+    - All data
   - PUT
     - Light brightness
     - Light state

@@ -160,3 +160,8 @@ class Fan:
         duty = self.fan_pwm_pin.duty_u16()
         speed = duty / self.max_pwm_duty
         return speed
+    
+    def get_all_data(self) -> dict:
+        all_data = {}
+        all_data['indoor humidity'] = self.get_latest_indoor_humidity()
+        return all_data

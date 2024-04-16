@@ -164,4 +164,6 @@ class Fan:
     def get_all_data(self) -> dict:
         all_data = {}
         all_data['indoor humidity'] = self.get_latest_indoor_humidity()
+        all_data['outdoor humidity'] = self.get_latest_outdoor_humidity()
+        all_data['fan speed'] = self.get_fan_speed()
         return all_data

@@ -85,3 +85,9 @@ class Motion_Detector:
     
     def get_enabled(self) -> bool:
         return self.enabled
+    
+    def get_all_data(self) -> dict:
+        all_data = {}
+        all_data['state'] = self.get_state()
+        all_data['enabled'] = self.get_enabled()        
+        return all_data

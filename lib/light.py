@@ -45,3 +45,9 @@ class Light:
     
     def get_brightness_pc(self) -> float:
         return self.brightness_pc
+    
+    def get_all_data(self) -> dict:
+        all_data = {}
+        all_data['brightness pc'] = self.get_brightness_pc()
+        all_data['state'] = self.get_state()
+        return all_data

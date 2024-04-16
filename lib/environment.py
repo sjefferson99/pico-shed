@@ -62,3 +62,8 @@ class Environment:
     def get_version(self) -> str:
         """Get current firmware version of Pico Environemt Control"""
         return self.version
+    
+    def get_all_data(self) -> dict:
+        all_data = {}
+        all_data['version'] = self.get_version()
+        return all_data

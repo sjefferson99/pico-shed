@@ -156,3 +156,18 @@ class Wireless_Network:
         else:
             self.logger.warn("Unable to connect to wireless network")
             return False
+        
+    def get_mac(self) -> str:
+        return self.mac
+    
+    def get_wlan_status_description(self, status) -> str:
+        description = self.status_names[status]
+        return description
+    
+    def get_all_data(self) -> dict:
+        all_data = {}
+        all_data['mac'] = self.get_mac()
+        status = self.get_status()
+        all_data['status description'] = self.get_wlan_status_description(status)
+        all_data['status code'] = status
+        return all_data

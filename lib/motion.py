@@ -82,3 +82,12 @@ class Motion_Detector:
         self.logger.info("Motion detection disabled")
         self.enabled = False
         return
+    
+    def get_enabled(self) -> bool:
+        return self.enabled
+    
+    def get_all_data(self) -> dict:
+        all_data = {}
+        all_data['state'] = self.get_state()
+        all_data['enabled'] = self.get_enabled()        
+        return all_data

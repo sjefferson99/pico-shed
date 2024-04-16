@@ -14,6 +14,8 @@ class Battery_Monitor:
         self.scaling_factor = (1 / (self.r2 / (self.r1 + self.r2)))
         self.battery_ADC = ADC(config.battery_adc_pin)
         self.reading_updated = uasyncio.Event()
+        self.last_reading = 0
+        self.last_reading_time = 0
         self.display = display
 
     def init_service(self) -> None:
@@ -50,3 +52,11 @@ class Battery_Monitor:
             self.reading_updated.clear()
             self.logger.info(f"{self.last_reading_time}: Battery voltage: {self.last_reading}")
             self.display.update_main_display_values({"battery_voltage": str(round(self.last_reading, 2)) + "v"})
+    
+    def get_latest_voltage(self) -> float:
+        return self.last_reading    
+    
+    def get_all_data(self) -> dict:
+        all_data = {}
+        all_data['voltage'] = self.get_latest_voltage()
+        return all_data

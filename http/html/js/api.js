@@ -5,7 +5,9 @@ document.addEventListener('DOMContentLoaded', function() {
     updateElementFromAPI('battery_voltage', '/api/battery/voltage');
     updateElementFromAPI('light_brightness', '/api/light/brightness');
     updateElementFromAPI('light_state', '/api/light/state');
+    updateElementFromAPI('light_motion_detection', '/api/light/motion_detection');
     updateElementFromAPI('motion_state', '/api/motion/state');
+    updateElementFromAPI('mac_address', '/api/wlan/mac');
 });
 
 /**
@@ -54,6 +56,33 @@ function setLightState(state) {
     .then(data => {
         console.log(data);
         updateElementFromAPI('light_state', '/api/light/state');
+        updateElementFromAPI('light_brightness', '/api/light/brightness');
+        updateElementFromAPI('light_motion_detection', '/api/light/motion_detection');
+    })
+    .catch(error => {
+        console.error('There was a problem with your fetch operation:', error);
+    });
+}
+
+function setLightMotionDetection(state) {
+    const url = '/api/light/motion_detection';
+    
+    fetch(url, {
+        method: 'PUT',
+        headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: `state=${state}`
+    })
+    .then(response => {
+        if (!response.ok) {
+        throw new Error('Network response was not ok');
+        }
+        return response.text();
+    })
+    .then(data => {
+        console.log(data);
+        updateElementFromAPI('light_motion_detection', '/api/light/motion_detection');
     })
     .catch(error => {
         console.error('There was a problem with your fetch operation:', error);

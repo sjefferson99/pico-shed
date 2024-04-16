@@ -5,18 +5,20 @@ from lib.battery import Battery_Monitor
 from json import dumps
 from lib.light import Light
 from lib.motion import Motion_Detector
-from logging import Logger
+from lib.ulogging import uLogger
 import uasyncio
 
 class Web_App:
 
-    def __init__(self, log_level: int, module_list: dict) -> None:
+    def __init__(self, log_level: int, module_list: dict) -> None: #TODO: module_list should probably be modules, named list of type dict is confusing.
         """
         module_list is a dictionary of required modules, this should take the structure:
         {'fan_module': Fan, 'battery_monitor': Battery_Monitor}
         """
-        self.logger = Logger(log_level)
+        self.ulogger = uLogger("Web app", log_level)
         self.app = webserver()
+        self.all_modules = module_list
+        self.environment = module_list['environment']
         self.fan = module_list['fan']
         self.battery_monitor = module_list['battery_monitor']
         self.motion = module_list['motion']
@@ -33,13 +35,13 @@ class Web_App:
         network_access = uasyncio.run(self.wlan.check_network_access())
 
         if network_access == True:
-            self.logger.info("Starting web server")
+            self.ulogger.info("Starting web server")
             self.app.run(host='0.0.0.0', port=config.web_port, loop_forever=False)
             self.running = True
-            self.logger.info("Starting web monitor")
+            self.ulogger.info("Starting web monitor")
             uasyncio.create_task(self.status_monitor())
         else:
-            self.logger.error("No network access - web server not started")
+            self.ulogger.error("No network access - web server not started")
     
     async def status_monitor(self) -> None:
         while True:
@@ -69,45 +71,78 @@ class Web_App:
         async def api(request, response):
             await response.send_file('/http/html/api.html')
         
-        self.app.add_resource(indoor_humidity, '/api/fan/indoor_humidity', fan = self.fan)
-        self.app.add_resource(outdoor_humidity, '/api/fan/outdoor_humidity', fan = self.fan)
-        self.app.add_resource(fan_speed, '/api/fan/speed', fan = self.fan)
-        self.app.add_resource(battery_voltage, '/api/battery/voltage', battery_monitor = self.battery_monitor)
-        self.app.add_resource(light_brightness, '/api/light/brightness', light = self.light)
-        self.app.add_resource(light_state, '/api/light/state', light = self.light, motion = self.motion)
-        self.app.add_resource(motion_state, '/api/motion/state', motion = self.motion)
+        self.app.add_resource(all_data, '/api/all_data', environment_modules = self.all_modules, ulogger = self.ulogger)
+        self.app.add_resource(indoor_humidity, '/api/fan/indoor_humidity', fan = self.fan, ulogger = self.ulogger)
+        self.app.add_resource(outdoor_humidity, '/api/fan/outdoor_humidity', fan = self.fan, ulogger = self.ulogger)
+        self.app.add_resource(fan_speed, '/api/fan/speed', fan = self.fan, ulogger = self.ulogger)
+        self.app.add_resource(battery_voltage, '/api/battery/voltage', battery_monitor = self.battery_monitor, ulogger = self.ulogger)
+        self.app.add_resource(light_brightness, '/api/light/brightness', light = self.light, ulogger = self.ulogger)
+        self.app.add_resource(light_state, '/api/light/state', light = self.light, motion = self.motion, ulogger = self.ulogger)
+        self.app.add_resource(light_motion_detection, '/api/light/motion_detection', motion = self.motion, ulogger = self.ulogger)
+        self.app.add_resource(motion_state, '/api/motion/state', motion = self.motion, ulogger = self.ulogger)
+        self.app.add_resource(wlan_mac, '/api/wlan/mac', wlan = self.wlan, ulogger = self.ulogger)
+        self.app.add_resource(version, '/api/version', environment = self.environment, ulogger = self.ulogger)
+
+class all_data():
+
+    def get(self, data, environment_modules: dict, ulogger: uLogger):
+        ulogger.info("API request - all_data")
+        all_data = {}
+
+        for module in environment_modules:
+            try:
+                all_data[module] = environment_modules[module].get_all_data() #TODO: module class contains get_all_data and init_service and is extended
+            except AttributeError as e:
+                ulogger.warn(f"{module} has no get_all_data function. Error: {e}")
+            except Exception as e:
+                ulogger.warn(f"An error occurred while processing {module}: {e}")
+
+        html = dumps(all_data)
+        ulogger.info(f"Return value: {html}")
+        return html
 
 class indoor_humidity():
 
-    def get(self, data, fan: Fan):
+    def get(self, data, fan: Fan, ulogger: uLogger):
+        ulogger.info("API request - fan/indoor_humidity")
         html = dumps(fan.get_latest_indoor_humidity())
+        ulogger.info(f"Return value: {html}")
         return html
 
 class outdoor_humidity():
 
-    def get(self, data, fan: Fan):
+    def get(self, data, fan: Fan, ulogger: uLogger):
+        ulogger.info("API request - fan/outdoor_humidity")
         html = dumps(fan.get_latest_outdoor_humidity())
+        ulogger.info(f"Return value: {html}")
         return html
     
 class fan_speed():
 
-    def get(self, data, fan: Fan):
+    def get(self, data, fan: Fan, ulogger: uLogger):
+        ulogger.info("API request - fan/speed")
         html = dumps(fan.get_fan_speed() * 100)
+        ulogger.info(f"Return value: {html}")
         return html
     
 class battery_voltage():
 
-    def get(self, data, battery_monitor: Battery_Monitor):
+    def get(self, data, battery_monitor: Battery_Monitor, ulogger: uLogger):
+        ulogger.info("API request - battery/voltage")
         html = dumps(round(battery_monitor.read_battery_voltage(), 2))
+        ulogger.info(f"Return value: {html}")
         return html
 
 class light_brightness():
 
-    def get(self, data, light: Light):
+    def get(self, data, light: Light, ulogger: uLogger):
+        ulogger.info("API request - light/brightness")
         html = dumps(light.get_brightness_pc())
+        ulogger.info(f"Return value: {html}")
         return html
     
-    def put(self, data, light: Light):
+    def put(self, data, light: Light, ulogger: uLogger):
+        ulogger.info("API request - (PUT) fan/indoor_humidity")
         html = {}
         brightness = int(data["value"])
         if brightness >=0 and brightness <=100:
@@ -120,15 +155,19 @@ class light_brightness():
             html["message"] = "brightness percent not between 0 and 100. PUT data: " + data
         html["requested_brightness"] = brightness
         html = dumps(html)
+        ulogger.info(f"Return value: {html}")
         return html
 
 class light_state():
 
-    def get(self, data, light: Light, motion: Motion_Detector):
+    def get(self, data, light: Light, motion: Motion_Detector, ulogger: uLogger):
+        ulogger.info("API request - light/state")
         html = dumps(light.get_state())
+        ulogger.info(f"Return value: {html}")
         return html
     
-    def put(self, data, light: Light, motion: Motion_Detector):
+    def put(self, data, light: Light, motion: Motion_Detector, ulogger: uLogger):
+        ulogger.info("API request - (PUT) light/state)")
         html = {}
         if data["state"] == "on":
             motion.disable()
@@ -138,18 +177,57 @@ class light_state():
             motion.disable()
             light.off()
             html["Message"] = "Light set off"
-        elif data["state"] == "auto":
-            motion.enable()
-            html["Message"] = "Light set to auto"
         else:
             html["Message"] = "Unrecognised light state command"
         
-        html["state"] = light.get_state()
-        html = dumps(html)
+        html = dumps(light.get_state())
+        ulogger.info(f"Return value: {html}")
+        return html
+    
+class light_motion_detection():
+
+    def get(self, data, motion: Motion_Detector, ulogger: uLogger):
+        ulogger.info("API request - light/motion_detection")
+        html = dumps(motion.get_enabled())
+        ulogger.info(f"Return value: {html}")
+        return html
+    
+    def put(self, data, motion: Motion_Detector, ulogger: uLogger):
+        ulogger.info("API request - (PUT) light/motion_detection)")
+        html = {}
+        if data["state"] == "enabled":
+            motion.enable()
+            html["Message"] = "Light motion detection enabled"
+        elif data["state"] == "disabled":
+            motion.disable()
+            html["Message"] = "Light motion detection disabled"
+        else:
+            html["Message"] = "Unrecognised light motion detection command"
+        
+        html = dumps(motion.get_enabled())
+        ulogger.info(f"Return value: {html}")
         return html
 
 class motion_state():
 
-    def get(self, data, motion: Motion_Detector):
+    def get(self, data, motion: Motion_Detector, ulogger: uLogger):
+        ulogger.info("API request - motion/state")
         html = dumps(motion.get_state())
+        ulogger.info(f"Return value: {html}")
+        return html
+    
+class wlan_mac():
+
+    def get(self, data, wlan, ulogger: uLogger):
+        ulogger.info("API request - wlan/mac")
+        html = dumps(wlan.get_mac())
+        ulogger.info(f"Return value: {html}")
+        return html
+    
+class version():
+
+    def get(self, data, environment, ulogger: uLogger):
+        ulogger.info("API request - all_data")
+        html = dumps(environment.get_version())
+        ulogger.info(f"Return value: {html}")
         return html

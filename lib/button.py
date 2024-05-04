@@ -1,42 +1,67 @@
 from machine import Pin
-import uasyncio
-from lib.ulogging import uLogger
+from ulogging import uLogger
+from uasyncio import Event, sleep_ms
 
 class Button:
-
-    def __init__(self, log_level: int, GPIO_pin: int, display) -> None:
+    """
+    Async button class that instantiates a coroutine to watch for button pin state changes, debounces and sets appropriate asyncio events.
+    """
+    def __init__(self, GPIO_pin: int, name: str, log_level: int = 2, pull_up: bool = True, pressed_event: Event | None = None, released_event: Event | None = None) -> None:
+        """
+        Provide buttons details to set up a logged async button watcher on a GPIO pin. Pull_up true for buttons connected to ground and False for pins connected to 3.3v
+        The two event arguments should be of type asyncio.Event and used elsewhere to take action on button state changes.
+        You can provide only a GPIO pin and a name and a default pull up button will be created with events accessible as object attributes.
+        """
         self.log_level = log_level
         self.logger = uLogger(f"Button {GPIO_pin}", log_level)
-        self.pin = Pin(GPIO_pin, Pin.IN, Pin.PULL_UP)
-        self.button_pressed = uasyncio.Event()
-        self.display = display
-
+        self.logger.info(f"Init button {name}")
+        self.gpio = GPIO_pin
+        self.pin_pull = Pin.PULL_DOWN
+        if pull_up:
+            self.pin_pull = Pin.PULL_UP
+        self.pin = Pin(GPIO_pin, Pin.IN, self.pin_pull)
+        self.name = name
+        self.pressed_event: Event = pressed_event if pressed_event is not None else Event()
+        self.released_event: Event = released_event if released_event is not None else Event()
+   
     async def wait_for_press(self) -> None:
-        self.logger.info("Starting button press watcher")
-        
+        """
+        Async coroutine to monitor for a change in button state. On state change, input is debounced and appropriate pushed or released event is set.
+        Call clear_pressed or clear_released as appropriate in function responding to button events.
+        """
+        self.logger.info(f"Starting button press watcher for button: {self.name}")
+
         while True:
-            previous_value = self.pin.value()
-            while (self.pin.value() == previous_value):
-                previous_value = self.pin.value()
-                await uasyncio.sleep(0.04)
-            
-            self.logger.info("Button pressed")
-            if self.display.backlight_on_time_ms == 0:
-                self.logger.info("Enabling backlight - button_pressed not set")
-                self.display.backlight_on()
+            current_value = self.pin.value()
+            active = 0
+            while active < 20:
+                if self.pin.value() != current_value:
+                    active += 1
+                else:
+                    active = 0
+                await sleep_ms(1)
+
+            if self.pin.value() == 0:
+                self.logger.info(f"Button pressed: {self.name}")
+                self.pressed_event.set()
             else:
-                self.logger.info("Backlight on - Setting button_pressed")
-                self.display.backlight_on() # Reset backlight timeout
-                self.button_pressed.set()
+                self.logger.info(f"Button released: {self.name}")
+                self.released_event.set()
 
-    def set_function_on_press(self, function, function_args: list = []) -> None:
-        uasyncio.create_task(self.function_on_press(function, function_args))
+    def clear_pressed(self) -> None:
+        self.pressed_event.clear()
     
-    async def function_on_press(self, function, function_args: list = []) -> None:
-        while True:
-            await self.button_pressed.wait()
-            self.button_pressed.clear()
-            function(self, *function_args)
+    def clear_released(self) -> None:
+        self.released_event.clear()
+    
+    def get_name(self) -> str:
+        """Get button name"""
+        return self.name
+    
+    def get_pin(self) -> int:
+        """Get GPIO pin connected to button"""
+        return self.gpio
 
-    def test_button_function(self) -> None:
-        self.logger.info("Test button function executed")
+    def get_pull_pin(self) -> int:
+        """Get pull up configuration, True is up, False is down"""
+        return self.pin_pull

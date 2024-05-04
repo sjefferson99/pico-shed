@@ -5,7 +5,6 @@ import config
 from time import sleep
 from utime import ticks_ms
 import uasyncio
-from lib.button import Button
 
 class Display:
     def __init__(self, log_level: int) -> None:
@@ -17,12 +16,6 @@ class Display:
             self.init_display()
         else:
             self.logger.info("Display disabled in config")
-    
-        self.buttons = []
-        self.BUTTON_A = 12
-        self.BUTTON_B = 13
-        self.BUTTON_X = 14
-        self.BUTTON_Y = 15
 
     def init_display(self) -> None:
         self.display = PicoGraphics(display=DISPLAY_PICO_DISPLAY, pen_type=PEN_RGB332, rotate=0)
@@ -44,6 +37,8 @@ class Display:
         self.header_font_scale = 3
         self.normal_font_scale = 2
         self.display_data = {"indoor_humidity": ["IHum", "Unknown"], "outdoor_humidity": ["OHum", "Unknown"], "fan_speed": ["Fan", "Unknown"], "wifi_status": ["Net", "Unknown"], "battery_voltage": ["Batt", "Unknown"], "web_server": ["Web", "Unknown"]}
+        self.backlight_state = False
+        self.backlight_on_time_ms = 0
         self.startup_display()
     
     def startup_display(self) -> None:
@@ -56,33 +51,18 @@ class Display:
     def init_service(self) -> None:
         self.logger.info("Loading backlight monitor")
         uasyncio.create_task(self.manage_backlight_timeout())
-        self.logger.info("Init buttons")
-        self.init_pico_display_buttons()
-        self.logger.info("Loading button service")
-        self.enable_button_watchers()
-        self.logger.info("Configuring button A")
-        self.button_a.set_function_on_press(Button.test_button_function, [])
-    
-    def init_pico_display_buttons(self) -> None:    
-        self.button_a = Button(self.log_level, self.BUTTON_A, self)
-        self.button_b = Button(self.log_level, self.BUTTON_B, self)
-        self.button_x = Button(self.log_level, self.BUTTON_X, self)
-        self.button_y = Button(self.log_level, self.BUTTON_Y, self)
-        self.buttons = [self.button_a, self.button_b, self.button_x, self.button_y]
-
-    def enable_button_watchers(self) -> None:
-        for button in self.buttons:
-            uasyncio.create_task(button.wait_for_press())
 
     def backlight_on(self) -> None:
         self.logger.info("Backlight on")
         self.display.set_backlight(1.0)
         self.backlight_on_time_ms = ticks_ms()
+        self.backlight_state = True
 
     def backlight_off(self) -> None:
         self.logger.info("Backlight off")
         self.display.set_backlight(0)
         self.backlight_on_time_ms = 0
+        self.backlight_state = False
     
     def should_backlight_be_switched_off(self) -> bool:
         if self.backlight_on_time_ms > 0 and (self.backlight_on_time_ms + (config.backlight_timeout_s * 1000)) < ticks_ms() and self.mode != "startup":
@@ -164,3 +144,6 @@ class Display:
                 self.display.text(text, self.left_margin, next_y_start, self.useable_width, self.normal_font_scale)
                 next_y_start = next_y_start + ((self.font_height * self.normal_font_scale) + self.line_spacing)
             self.display.update()
+
+    def get_backlight_state(self) -> bool:
+        return self.backlight_state

@@ -11,6 +11,7 @@ import uasyncio
 class Fan:
     def __init__(self, log_level: int, display: Display, wlan: Wireless_Network) -> None:
         self.logger = uLogger("Fan", log_level)
+        self.logger.info(f"Init fan")
         self.status_led = Status_LED(log_level)
         self.display = display
         self.max_pwm_duty = 65535

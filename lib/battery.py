@@ -8,6 +8,7 @@ from display import Display
 class Battery_Monitor:
     def __init__(self, log_level: int, display: Display) -> None:
         self.logger = uLogger("Battery monitor", log_level)
+        self.logger.info(f"Init battery monitor")
         self.r1 = config.r1
         self.r2 = config.r2
         self.voltage_correction = config.voltage_correction

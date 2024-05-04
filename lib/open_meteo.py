@@ -1,6 +1,5 @@
 """
 Open meteo classes for working weather data from the internet.
-This module was written on python v3.9.2
 """
 
 from json import loads
@@ -15,6 +14,7 @@ class Weather_API:
     """
     def __init__(self, log_level: int) -> None:
         self.logger = uLogger("Open-Meteo", log_level)
+        self.logger.info("Init Open-Meteo")
         self.latlong = config.lat_long
         self.baseurl = "http://api.open-meteo.com/v1/forecast?latitude={}&longitude={}".format(self.latlong[0], self.latlong[1])
         

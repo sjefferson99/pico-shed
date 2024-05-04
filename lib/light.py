@@ -6,6 +6,7 @@ class Light:
     def __init__(self, log_level: int) -> None:
         self.log_level = log_level
         self.logger = uLogger("Light", log_level)
+        self.logger.info("Init light")
         self.pin = config.led_pin
         self.max_pwm_duty = 65535
         self.pwm_pin = PWM(Pin(self.pin, Pin.OUT))

@@ -16,6 +16,7 @@ class Web_App:
         {'fan_module': Fan, 'battery_monitor': Battery_Monitor}
         """
         self.ulogger = uLogger("Web app", log_level)
+        self.ulogger.info("Init webserver")
         self.app = webserver()
         self.all_modules = module_list
         self.environment = module_list['environment']

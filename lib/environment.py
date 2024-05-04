@@ -19,6 +19,7 @@ class Environment:
         self.log_level = log_level
         self.logger = uLogger("Environment", log_level)
         self.version = "1.6.0"
+        self.logger.info(f"Init environment module version: {self.version}")
         self.display = Display(self.log_level)
         self.display.add_text_line("Configuring WiFi")
         self.wlan = Wireless_Network(log_level, self.display)

@@ -13,7 +13,8 @@ from display import Display
 class Wireless_Network:
 
     def __init__(self, log_level: int, display: Display) -> None:
-        self.logger = uLogger("WIFI", log_level)
+        self.logger = uLogger("WiFi", log_level)
+        self.logger.info(f"Init WiFi")
         self.status_led = Status_LED(log_level)
         self.wifi_ssid = config.wifi_ssid
         self.wifi_password = config.wifi_password

@@ -10,6 +10,7 @@ class BME_280:
     
     def __init__(self, log_level: int) -> None:
         self.logger = uLogger("BME280", log_level)
+        self.logger.info("Init BME280")
         self.i2c = PimoroniI2C(**config.i2c_pins)
         self.bme = BreakoutBME280(self.i2c)
         self.get_readings() # Clear incorrect first value after startup

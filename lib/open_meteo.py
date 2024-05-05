@@ -1,5 +1,6 @@
 """
 Built against Pimoroni Micropython version: v1.22.2 (https://github.com/pimoroni/pimoroni-pico/releases/download/v1.22.2/pimoroni-picow-v1.22.2-micropython.uf2)
+Requires the uaiohttpclient module available on pip/mip or statically copying the py file alongside this one: https://pypi.org/project/micropython-uaiohttpclient/
 """
 
 from json import loads
@@ -7,10 +8,12 @@ from time import localtime
 import config
 from lib.ulogging import uLogger
 import gc
+import uaiohttpclient
 
 class Weather_API:
     """
-    Class for interacting with the Open_Meteo API
+    Class for interacting with the Open_Meteo API using async requests
+    Provides example for retrieving and processing humidity information
     """
     def __init__(self, log_level: int) -> None:
         self.logger = uLogger("Open-Meteo", log_level)
@@ -19,8 +22,9 @@ class Weather_API:
         self.baseurl = "http://api.open-meteo.com/v1/forecast?latitude={}&longitude={}".format(self.latlong[0], self.latlong[1])
         
     async def get_humidity_async(self) -> dict:
-        import uaiohttpclient
-
+        """
+        Get the current humidity for the configured location using an async request.
+        """
         gc.collect()
         self.parameters = "&hourly=relative_humidity_2m&current_weather=false&past_days=1&forecast_days=1&windspeed_unit=kn&timezone=GB&timeformat=unixtime"
         self.url = self.baseurl + self.parameters

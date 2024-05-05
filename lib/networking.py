@@ -1,13 +1,16 @@
-from utime import ticks_ms, sleep
+"""
+Built against Pimoroni Micropython version: v1.22.2 (https://github.com/pimoroni/pimoroni-pico/releases/download/v1.22.2/pimoroni-picow-v1.22.2-micropython.uf2)
+"""
+
+from time import ticks_ms
 from math import ceil
 import rp2
 import network
-from ubinascii import hexlify
+from binascii import hexlify
 import config
 from lib.ulogging import uLogger
 from lib.helpers import Status_LED
-import uasyncio
-from sys import exit
+from asyncio import create_task, sleep
 from display import Display
 
 class Wireless_Network:
@@ -56,7 +59,7 @@ class Wireless_Network:
         self.logger.info("MAC: " + self.mac)
 
     def init_service(self) -> None:
-        uasyncio.create_task(self.network_status_monitor())
+        create_task(self.network_status_monitor())
 
     async def network_status_monitor(self) -> None:
         while True:
@@ -67,7 +70,7 @@ class Wireless_Network:
                 self.display.update_main_display_values({"wifi_status": "Connecting"})
             else:
                 self.display.update_main_display_values({"wifi_status": "Error"})
-            await uasyncio.sleep(5)
+            await sleep(5)
     
     def dump_status(self):
         status = self.wlan.status()
@@ -76,7 +79,7 @@ class Wireless_Network:
     
     async def wait_status(self, expected_status, *, timeout=config.wifi_connect_timeout_seconds, tick_sleep=0.5) -> bool:
         for unused in range(ceil(timeout / tick_sleep)):
-            await uasyncio.sleep(tick_sleep)
+            await sleep(tick_sleep)
             status = self.dump_status()
             if status == expected_status:
                 return True

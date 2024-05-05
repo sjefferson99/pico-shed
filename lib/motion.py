@@ -1,7 +1,11 @@
+"""
+Built against Pimoroni Micropython version: v1.22.2 (https://github.com/pimoroni/pimoroni-pico/releases/download/v1.22.2/pimoroni-picow-v1.22.2-micropython.uf2)
+"""
+
 from ulogging import uLogger
 import config
 from machine import Pin
-import uasyncio
+from asyncio import Event, create_task, sleep
 from light import Light
 from time import time
 
@@ -14,7 +18,7 @@ class Motion_Detector:
         self.ON = 1
         self.OFF = -1
         self.motion_detected = False
-        self.motion_updated = uasyncio.Event()
+        self.motion_updated = Event()
         self.light = Light(log_level)
         self.light_off_delay = config.motion_light_off_delay
         self.light_off_time = 0
@@ -23,9 +27,9 @@ class Motion_Detector:
 
     def init_service(self) -> None:
         self.logger.info("Loading motion monitor")
-        uasyncio.create_task(self.motion_monitor())
+        create_task(self.motion_monitor())
         self.logger.info("Loading motion light timer")
-        uasyncio.create_task(self.motion_light_off_timer())
+        create_task(self.motion_light_off_timer())
     
     async def motion_monitor(self) -> None:
         if self.config_enabled == False:
@@ -44,7 +48,7 @@ class Motion_Detector:
                     await self.trigger_motion_no_longer_detected()
                 
                 old_motion_value = new_motion_value
-            await uasyncio.sleep_ms(500)
+            await sleep(0.5)
     
     async def trigger_motion_detected(self) -> None:
         self.logger.info("Motion detected")
@@ -68,7 +72,7 @@ class Motion_Detector:
             if self.motion_detected == 0 and self.light_off_time < time() and self.light.get_state() and self.enabled:
                 self.logger.info("Motion light timeout exceeded")
                 self.light.off()
-            await uasyncio.sleep_ms(100)
+            await sleep(0.1)
     
     def get_state(self) -> bool:
         return self.motion_detected

@@ -1,5 +1,6 @@
-# Requires the pico to be running a Pimoroni specific micropython build:
-# https://github.com/pimoroni/pimoroni-pico/releases
+"""
+Built against Pimoroni Micropython version: v1.22.2 (https://github.com/pimoroni/pimoroni-pico/releases/download/v1.22.2/pimoroni-picow-v1.22.2-micropython.uf2)
+"""
 
 from breakout_bme280 import BreakoutBME280
 from pimoroni_i2c import PimoroniI2C

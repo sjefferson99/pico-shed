@@ -1,7 +1,11 @@
+"""
+Built against Pimoroni Micropython version: v1.22.2 (https://github.com/pimoroni/pimoroni-pico/releases/download/v1.22.2/pimoroni-picow-v1.22.2-micropython.uf2)
+"""
+
 from machine import ADC
 import config
 from lib.ulogging import uLogger
-import uasyncio
+import asyncio
 from time import time
 from display import Display
 
@@ -14,17 +18,17 @@ class Battery_Monitor:
         self.voltage_correction = config.voltage_correction
         self.scaling_factor = (1 / (self.r2 / (self.r1 + self.r2)))
         self.battery_ADC = ADC(config.battery_adc_pin)
-        self.reading_updated = uasyncio.Event()
+        self.reading_updated = asyncio.Event()
         self.last_reading = 0
         self.last_reading_time = 0
         self.display = display
 
     def init_service(self) -> None:
         self.logger.info("Init battery voltage poll")
-        uasyncio.create_task(self.poll_battery_voltage())
+        asyncio.create_task(self.poll_battery_voltage())
         if self.display.enabled:
             self.logger.info("Init battery voltage display updater")
-            uasyncio.create_task(self.battery_display_updater())
+            asyncio.create_task(self.battery_display_updater())
         else:
             self.logger.info("Display disabled, skipping battery display updater service")
 
@@ -45,7 +49,7 @@ class Battery_Monitor:
             self.last_reading = self.read_battery_voltage()
             self.last_reading_time = time()
             self.reading_updated.set()
-            await uasyncio.sleep(5)
+            await asyncio.sleep(5)
 
     async def battery_display_updater(self) -> None:
         while True:

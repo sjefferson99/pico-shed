@@ -1,3 +1,7 @@
+"""
+Built against Pimoroni Micropython version: v1.22.2 (https://github.com/pimoroni/pimoroni-pico/releases/download/v1.22.2/pimoroni-picow-v1.22.2-micropython.uf2)
+"""
+
 from machine import Pin, PWM
 import config
 from lib.networking import Wireless_Network
@@ -6,7 +10,7 @@ from lib.open_meteo import Weather_API
 from lib.bme_280 import BME_280
 from lib.ulogging import uLogger
 from lib.display import Display
-import uasyncio
+from asyncio import create_task, sleep
 
 class Fan:
     def __init__(self, log_level: int, display: Display, wlan: Wireless_Network) -> None:
@@ -34,7 +38,7 @@ class Fan:
     
     def init_service(self) -> None:
         self.logger.info("Loading fan management")
-        uasyncio.create_task(self.start_fan_management())
+        create_task(self.start_fan_management())
     
     async def start_fan_management(self) -> None:
         if self.config_enabled == False:
@@ -42,8 +46,8 @@ class Fan:
             return
         
         while True:
-            uasyncio.create_task(self.assess_fan_state())
-            await uasyncio.sleep(config.weather_poll_frequency_in_seconds)
+            create_task(self.assess_fan_state())
+            await sleep(config.weather_poll_frequency_in_seconds)
     
     def pwm_fan_test(self) -> None:
         self.set_speed(0.1)

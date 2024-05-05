@@ -1,3 +1,7 @@
+"""
+Built against Pimoroni Micropython version: v1.22.2 (https://github.com/pimoroni/pimoroni-pico/releases/download/v1.22.2/pimoroni-picow-v1.22.2-micropython.uf2)
+"""
+
 from lib.fan import Fan
 from lib.display import Display
 from lib.ulogging import uLogger
@@ -8,7 +12,7 @@ from lib.networking import Wireless_Network
 from http.website import Web_App
 from motion import Motion_Detector
 from button import Button
-from uasyncio import create_task, get_event_loop
+from asyncio import create_task, get_event_loop
 
 class Environment:
     def __init__(self, log_level: int) -> None:

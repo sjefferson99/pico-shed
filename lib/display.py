@@ -1,10 +1,13 @@
+"""
+Built against Pimoroni Micropython version: v1.22.2 (https://github.com/pimoroni/pimoroni-pico/releases/download/v1.22.2/pimoroni-picow-v1.22.2-micropython.uf2)
+"""
+
 from picographics import PicoGraphics, DISPLAY_PICO_DISPLAY, PEN_RGB332
 from pimoroni import RGBLED
 from lib.ulogging import uLogger
 import config
-from time import sleep
-from utime import ticks_ms
-import uasyncio
+from time import sleep, ticks_ms
+from asyncio import sleep as async_sleep, create_task
 
 class Display:
     def __init__(self, log_level: int) -> None:
@@ -50,7 +53,7 @@ class Display:
 
     def init_service(self) -> None:
         self.logger.info("Loading backlight monitor")
-        uasyncio.create_task(self.manage_backlight_timeout())
+        create_task(self.manage_backlight_timeout())
 
     def backlight_on(self) -> None:
         self.logger.info("Backlight on")
@@ -76,7 +79,7 @@ class Display:
             while True:
                 if self.should_backlight_be_switched_off():
                     self.backlight_off()
-                await uasyncio.sleep(0.1)
+                await async_sleep(0.1)
         else:
             self.logger.info("Display not enabled - backlight monitor not started")
 

@@ -1,3 +1,7 @@
+"""
+Built against Pimoroni Micropython version: v1.22.2 (https://github.com/pimoroni/pimoroni-pico/releases/download/v1.22.2/pimoroni-picow-v1.22.2-micropython.uf2)
+"""
+
 from ulogging import uLogger
 import config
 from machine import Pin, PWM

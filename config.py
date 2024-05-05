@@ -50,6 +50,6 @@ pir_pin = 21
 # Seconds for light to remain on after motion no longer detected
 motion_light_off_delay = 60
 
-## Lights
+## Light
 led_pin = 22
 default_brightness_pc = 100
